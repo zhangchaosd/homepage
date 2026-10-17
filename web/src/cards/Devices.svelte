@@ -103,7 +103,7 @@
     color: var(--faint);
     font-weight: inherit;
   }
-  :global(:root[data-theme="panel"]) .n {
+  :global(:root[data-family="panel"]) .n {
     font-size: 54px;
     color: var(--accent);
   }
@@ -111,7 +111,7 @@
     color: var(--muted);
     font-size: 13px;
   }
-  :global(:root[data-theme="panel"]) .caption {
+  :global(:root[data-family="panel"]) .caption {
     font-family: var(--font-mono);
     font-size: 11px;
     letter-spacing: 0.08em;
@@ -142,7 +142,7 @@
     margin-top: 1px;
     color: var(--ink);
   }
-  :global(:root[data-theme="panel"]) .kind,
+  :global(:root[data-family="panel"]) .kind,
   :global(:root[data-theme="swiss"]) .kind {
     background: var(--surface-2);
     border: 1px solid var(--hair);
@@ -194,7 +194,7 @@
     -webkit-user-select: text;
     user-select: text;
   }
-  :global(:root[data-theme="panel"]) .address {
+  :global(:root[data-family="panel"]) .address {
     color: var(--data);
   }
   .address.small {
@@ -249,7 +249,7 @@
     font-size: 12.5px;
     color: var(--danger);
   }
-  :global(:root[data-theme="panel"]) .error {
+  :global(:root[data-family="panel"]) .error {
     font-family: var(--font-mono);
     text-transform: uppercase;
     font-size: 11.5px;

@@ -146,7 +146,7 @@
   .grid li {
     outline: var(--tile-gap) solid var(--tile-grid-bg);
   }
-  :global(:root[data-theme="panel"]) .grid li {
+  :global(:root[data-family="panel"]) .grid li {
     outline: 0;
   }
 
@@ -160,7 +160,7 @@
     background: var(--tile-bg);
     border-radius: var(--tile-radius);
   }
-  :global(:root[data-theme="panel"]) .tile {
+  :global(:root[data-family="panel"]) .tile {
     border: 1px solid var(--tile-border);
   }
   @media (hover: hover) and (pointer: fine) {
@@ -200,13 +200,13 @@
   .glyph img {
     object-fit: contain;
   }
-  :global(:root[data-theme="panel"]) .glyph {
+  :global(:root[data-family="panel"]) .glyph {
     background: var(--bg);
     border: 1px solid var(--line);
     border-radius: 7px;
     color: var(--accent);
   }
-  :global(:root[data-theme="panel"]) .glyph.letter,
+  :global(:root[data-family="panel"]) .glyph.letter,
   :global(:root[data-theme="swiss"]) .glyph.letter {
     font-style: normal;
     font-size: 15px;

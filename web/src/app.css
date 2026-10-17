@@ -2,6 +2,15 @@
 @import "@fontsource/instrument-serif/400-italic.css";
 @import "@fontsource-variable/geist";
 @import "@fontsource-variable/geist-mono";
+/* Faces for 科幻 and 未来; a browser only downloads them when a theme uses them. */
+@import "@fontsource/chakra-petch/400.css";
+@import "@fontsource/chakra-petch/600.css";
+@import "@fontsource/chakra-petch/700.css";
+@import "@fontsource-variable/jetbrains-mono";
+@import "@fontsource-variable/unbounded";
+@import "@fontsource-variable/manrope";
+@import "./themes/scifi.css";
+@import "./themes/future.css";
 
 /* =====================================================================
    Three looks on one structure. Components only use the semantic tokens
@@ -428,10 +437,10 @@ button {
 .dot.down {
   background: var(--danger);
 }
-:root[data-theme="panel"] .dot {
+:root[data-family="panel"] .dot {
   box-shadow: 0 0 8px var(--ok);
 }
-:root[data-theme="panel"] .dot.down {
+:root[data-family="panel"] .dot.down {
   box-shadow: 0 0 8px var(--danger);
 }
 

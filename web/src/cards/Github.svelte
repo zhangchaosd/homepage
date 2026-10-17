@@ -102,7 +102,7 @@
     border: 1px solid var(--hair);
     object-fit: cover;
   }
-  :global(:root[data-theme="panel"]) .avatar,
+  :global(:root[data-family="panel"]) .avatar,
   :global(:root[data-theme="swiss"]) .avatar {
     border-radius: var(--tile-radius);
   }
@@ -122,7 +122,7 @@
     letter-spacing: var(--ls-heading);
     line-height: 1.1;
   }
-  :global(:root[data-theme="panel"]) .name {
+  :global(:root[data-family="panel"]) .name {
     font-family: var(--font-sans);
     font-weight: 600;
     font-size: 16px;
@@ -146,13 +146,13 @@
     margin: 18px 0 0;
     border-top: 1px solid var(--hair);
   }
-  :global(:root[data-theme="panel"]) .stats,
+  :global(:root[data-family="panel"]) .stats,
   :global(:root[data-theme="swiss"]) .stats {
     gap: var(--tile-gap);
     background: var(--tile-grid-bg);
     border: 1px solid var(--tile-border);
   }
-  :global(:root[data-theme="panel"]) .stats {
+  :global(:root[data-family="panel"]) .stats {
     border: 0;
     background: transparent;
   }
@@ -171,13 +171,13 @@
   .stats div + div {
     padding-left: 12px;
   }
-  :global(:root[data-theme="panel"]) .stats div,
+  :global(:root[data-family="panel"]) .stats div,
   :global(:root[data-theme="swiss"]) .stats div {
     padding: 10px 12px;
     border-right: 0;
     background: var(--tile-bg);
   }
-  :global(:root[data-theme="panel"]) .stats div {
+  :global(:root[data-family="panel"]) .stats div {
     border: 1px solid var(--tile-border);
     border-radius: var(--tile-radius);
   }
@@ -185,7 +185,7 @@
     margin: 0;
     font-size: 28px;
   }
-  :global(:root[data-theme="panel"]) dd {
+  :global(:root[data-family="panel"]) dd {
     font-size: 24px;
   }
 
@@ -200,7 +200,7 @@
     background: var(--tile-grid-bg);
     border: 1px solid var(--tile-border);
   }
-  :global(:root[data-theme="panel"]) .repos {
+  :global(:root[data-family="panel"]) .repos {
     border: 0;
     background: transparent;
   }
@@ -217,7 +217,7 @@
     border-radius: var(--tile-radius);
     transition: background-color 160ms ease;
   }
-  :global(:root[data-theme="panel"]) .repo {
+  :global(:root[data-family="panel"]) .repo {
     border: 1px solid var(--tile-border);
   }
   @media (hover: hover) and (pointer: fine) {
@@ -252,7 +252,7 @@
     font-size: 11.5px;
     color: var(--muted);
   }
-  :global(:root[data-theme="panel"]) .meta,
+  :global(:root[data-family="panel"]) .meta,
   :global(:root[data-theme="swiss"]) .meta {
     font-family: var(--font-mono);
     font-size: 11px;

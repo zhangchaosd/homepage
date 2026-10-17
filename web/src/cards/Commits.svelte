@@ -69,7 +69,7 @@
   .n {
     font-size: 64px;
   }
-  :global(:root[data-theme="panel"]) .n {
+  :global(:root[data-family="panel"]) .n {
     font-size: 54px;
     color: var(--accent);
   }
@@ -77,7 +77,7 @@
     color: var(--muted);
     font-size: 13px;
   }
-  :global(:root[data-theme="panel"]) .caption {
+  :global(:root[data-family="panel"]) .caption {
     font-family: var(--font-mono);
     font-size: 11px;
     letter-spacing: 0.08em;
@@ -119,7 +119,7 @@
     font-size: 12px;
     color: var(--muted);
   }
-  :global(:root[data-theme="panel"]) .meta {
+  :global(:root[data-family="panel"]) .meta {
     font-family: var(--font-mono);
     font-size: 11.5px;
   }
@@ -135,7 +135,7 @@
   .sha {
     font-size: 11.5px;
   }
-  :global(:root[data-theme="panel"]) .sha,
+  :global(:root[data-family="panel"]) .sha,
   :global(:root[data-theme="swiss"]) .sha {
     color: var(--accent);
   }

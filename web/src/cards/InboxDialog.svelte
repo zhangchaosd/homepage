@@ -281,7 +281,7 @@
     color: var(--ink);
     transition: border-color 160ms ease;
   }
-  :global(:root[data-theme="panel"]) .title-input {
+  :global(:root[data-family="panel"]) .title-input {
     font-family: var(--font-sans);
     font-size: 17px;
     font-weight: 600;

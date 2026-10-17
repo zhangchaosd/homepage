@@ -120,7 +120,7 @@
     letter-spacing: var(--ls-heading);
     line-height: 1.2;
   }
-  :global(:root[data-theme="panel"]) h2 {
+  :global(:root[data-family="panel"]) h2 {
     font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 0.14em;

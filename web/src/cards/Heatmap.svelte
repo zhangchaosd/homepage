@@ -99,7 +99,7 @@
     fill: var(--heat-0);
     rx: var(--heat-radius, 1.5px);
   }
-  :global(:root[data-theme="panel"]) rect {
+  :global(:root[data-family="panel"]) rect {
     rx: 1px;
   }
   :global(:root[data-theme="swiss"]) rect {

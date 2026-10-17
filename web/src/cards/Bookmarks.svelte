@@ -81,12 +81,12 @@
     font-style: italic;
     color: var(--ink);
   }
-  :global(:root[data-theme="panel"]) .mark {
+  :global(:root[data-family="panel"]) .mark {
     border-radius: 5px;
     background: var(--bg);
     border-color: var(--line);
   }
-  :global(:root[data-theme="panel"]) .monogram {
+  :global(:root[data-family="panel"]) .monogram {
     font-style: normal;
     font-family: var(--font-mono);
     font-weight: 600;

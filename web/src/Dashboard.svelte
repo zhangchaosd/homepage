@@ -171,7 +171,7 @@
     {#if headline.length > 0}
       <ul class="index">
         {#each headline as item (item.key)}
-          <li>
+          <li data-key={item.key} style:--pct={item.of ? item.value / item.of : null}>
             <a href="#section-{index(item.key)}">
               <span class="k"><i class="dot" class:down={item.warn}></i>{item.label}</span>
               <span class="n figure tnum">{item.value}{#if item.of !== undefined}<small>/{item.of}</small>{/if}</span>
@@ -288,7 +288,7 @@
     padding-bottom: 12px;
     border-bottom: 1px solid var(--section-rule);
   }
-  :global(:root[data-theme="panel"]) .mast {
+  :global(:root[data-family="panel"]) .mast {
     background: var(--surface);
     border: 1px solid var(--line);
     border-radius: 8px;
@@ -310,7 +310,7 @@
   .brand .period {
     color: var(--accent);
   }
-  :global(:root[data-theme="panel"]) .brand,
+  :global(:root[data-family="panel"]) .brand,
   :global(:root[data-theme="swiss"]) .brand {
     font-style: normal;
     font-family: var(--font-mono);
@@ -326,7 +326,7 @@
     margin: 0;
     color: var(--muted);
   }
-  :global(:root[data-theme="panel"]) .stamp .time {
+  :global(:root[data-family="panel"]) .stamp .time {
     color: var(--accent);
     font-size: 13px;
     letter-spacing: 0.04em;
@@ -352,7 +352,7 @@
     border-color: var(--ink);
     color: var(--ink);
   }
-  :global(:root[data-theme="panel"]) .search,
+  :global(:root[data-family="panel"]) .search,
   :global(:root[data-theme="swiss"]) .search {
     width: 280px;
     height: 34px;
@@ -361,7 +361,7 @@
     border-radius: var(--input-radius);
     background: var(--input-bg);
   }
-  :global(:root[data-theme="panel"]) .search:focus-within,
+  :global(:root[data-family="panel"]) .search:focus-within,
   :global(:root[data-theme="swiss"]) .search:focus-within {
     border-color: var(--accent);
   }
@@ -429,7 +429,7 @@
     padding: clamp(36px, 5vw, 60px) 0 clamp(28px, 3vw, 40px);
     border-bottom: 1px solid var(--section-rule);
   }
-  :global(:root[data-theme="panel"]) .hero {
+  :global(:root[data-family="panel"]) .hero {
     padding: clamp(28px, 4vw, 44px) 8px 28px;
     border-bottom: 0;
   }
@@ -448,7 +448,7 @@
     font-style: italic;
     color: var(--accent);
   }
-  :global(:root[data-theme="panel"]) h1 em {
+  :global(:root[data-family="panel"]) h1 em {
     font-style: normal;
     color: inherit;
   }
@@ -462,7 +462,7 @@
     color: var(--ink-2);
     max-width: 42ch;
   }
-  :global(:root[data-theme="panel"]) .tagline {
+  :global(:root[data-family="panel"]) .tagline {
     font-size: 13px;
     font-family: var(--font-mono);
     color: var(--muted);
@@ -508,7 +508,7 @@
     margin-left: 1px;
     font-weight: inherit;
   }
-  :global(:root[data-theme="panel"]) .index,
+  :global(:root[data-family="panel"]) .index,
   :global(:root[data-theme="swiss"]) .index {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -518,28 +518,28 @@
     box-shadow: var(--card-shadow);
     overflow: hidden;
   }
-  :global(:root[data-theme="panel"]) .index li,
+  :global(:root[data-family="panel"]) .index li,
   :global(:root[data-theme="swiss"]) .index li {
     border-bottom: 0;
     border-right: var(--card-border-w) solid var(--card-border);
   }
-  :global(:root[data-theme="panel"]) .index li:last-child,
+  :global(:root[data-family="panel"]) .index li:last-child,
   :global(:root[data-theme="swiss"]) .index li:last-child {
     border-right: 0;
   }
-  :global(:root[data-theme="panel"]) .index a,
+  :global(:root[data-family="panel"]) .index a,
   :global(:root[data-theme="swiss"]) .index a {
     flex-direction: column-reverse;
     align-items: flex-start;
     gap: 6px;
     padding: 14px 14px 12px;
   }
-  :global(:root[data-theme="panel"]) .index a:hover,
+  :global(:root[data-family="panel"]) .index a:hover,
   :global(:root[data-theme="swiss"]) .index a:hover {
     padding-left: 14px;
     background: var(--surface-hover);
   }
-  :global(:root[data-theme="panel"]) .index .k,
+  :global(:root[data-family="panel"]) .index .k,
   :global(:root[data-theme="swiss"]) .index .k {
     font-family: var(--font-mono);
     font-size: 10.5px;
@@ -547,7 +547,7 @@
     text-transform: uppercase;
     color: var(--muted);
   }
-  :global(:root[data-theme="panel"]) .index .n {
+  :global(:root[data-family="panel"]) .index .n {
     font-size: 34px;
     color: var(--accent);
   }
@@ -563,7 +563,7 @@
     display: grid;
     gap: 0;
   }
-  :global(:root[data-theme="panel"]) .results,
+  :global(:root[data-family="panel"]) .results,
   :global(:root[data-theme="swiss"]) .results {
     gap: 14px;
   }
@@ -576,7 +576,7 @@
   .row + .row {
     border-top-color: var(--section-rule);
   }
-  :global(:root[data-theme="panel"]) .row,
+  :global(:root[data-family="panel"]) .row,
   :global(:root[data-theme="swiss"]) .row {
     padding: 0;
     border-top: 0;
@@ -597,7 +597,7 @@
   .cell + .cell {
     border-left: 1px solid var(--col-rule);
   }
-  :global(:root[data-theme="panel"]) .cell,
+  :global(:root[data-family="panel"]) .cell,
   :global(:root[data-theme="swiss"]) .cell {
     padding: 0;
     border-left: 0;
@@ -636,7 +636,7 @@
     padding-top: 12px;
     border-top: 1px solid var(--section-rule);
   }
-  :global(:root[data-theme="panel"]) .foot {
+  :global(:root[data-family="panel"]) .foot {
     border-top-color: var(--hair);
   }
   :global(:root[data-theme="swiss"]) .foot {
@@ -655,20 +655,19 @@
       padding: 28px 0 0;
       margin-top: 28px;
     }
-    :global(:root[data-theme="panel"]) .cell:nth-child(3),
+    :global(:root[data-family="panel"]) .cell:nth-child(3),
     :global(:root[data-theme="swiss"]) .cell:nth-child(3) {
       border-top: 0;
       padding: 0;
       margin-top: 0;
     }
-    .cell:nth-child(2) {
+    /* Column padding beside the rule: only the ruled layout has rules. */
+    :global(:root[data-family="ruled"]) .cell:nth-child(2) {
       padding-right: 0;
-    }
-    .cell:nth-child(1):not(:only-child) {
-      padding-right: 28px;
-    }
-    .cell:nth-child(2) {
       padding-left: 28px;
+    }
+    :global(:root[data-family="ruled"]) .cell:nth-child(1):not(:only-child) {
+      padding-right: 28px;
     }
   }
   @media (max-width: 760px) {
@@ -682,12 +681,23 @@
     .controls {
       gap: 16px;
     }
-    .search {
-      grid-column: 1 / -1;
-      width: 100%;
+    .mast {
+      grid-template-columns: auto minmax(0, 1fr);
+    }
+    .controls {
+      min-width: 0;
+      justify-content: flex-end;
+    }
+    /* The search takes whatever the masthead has left, in every theme. */
+    .search,
+    :global(:root[data-family="panel"]) .search,
+    :global(:root[data-theme="swiss"]) .search {
+      flex: 1;
+      width: auto;
+      min-width: 0;
       order: 3;
     }
-    :global(:root[data-theme="panel"]) .mast {
+    :global(:root[data-family="panel"]) .mast {
       padding: 10px 12px;
     }
     .tool span {
@@ -698,15 +708,15 @@
       gap: 24px;
       padding-top: 28px;
     }
-    :global(:root[data-theme="panel"]) .index,
+    :global(:root[data-family="panel"]) .index,
     :global(:root[data-theme="swiss"]) .index {
       grid-template-columns: 1fr 1fr;
     }
-    :global(:root[data-theme="panel"]) .index li:nth-child(2),
+    :global(:root[data-family="panel"]) .index li:nth-child(2),
     :global(:root[data-theme="swiss"]) .index li:nth-child(2) {
       border-right: 0;
     }
-    :global(:root[data-theme="panel"]) .index li:nth-child(-n + 2),
+    :global(:root[data-family="panel"]) .index li:nth-child(-n + 2),
     :global(:root[data-theme="swiss"]) .index li:nth-child(-n + 2) {
       border-bottom: var(--card-border-w) solid var(--card-border);
     }
@@ -714,7 +724,8 @@
       padding: 22px 0 24px;
     }
     .cell,
-    .cell:nth-child(n) {
+    .cell:nth-child(n),
+    :global(:root[data-family="ruled"]) .cell:nth-child(n):nth-child(n) {
       grid-column: span 12;
       padding: 0;
       border-left: 0;
@@ -725,7 +736,7 @@
       padding-top: 22px;
       margin-top: 22px;
     }
-    :global(:root[data-theme="panel"]) .cell + .cell,
+    :global(:root[data-family="panel"]) .cell + .cell,
     :global(:root[data-theme="swiss"]) .cell + .cell {
       border-top: 0;
       padding-top: 0;

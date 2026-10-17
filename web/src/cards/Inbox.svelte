@@ -183,7 +183,7 @@
   .compose:focus-within {
     border-color: var(--ink);
   }
-  :global(:root[data-theme="panel"]) .compose:focus-within {
+  :global(:root[data-family="panel"]) .compose:focus-within {
     border-color: var(--accent);
   }
   .title,
@@ -211,8 +211,8 @@
     line-height: 1.5;
     resize: vertical;
   }
-  :global(:root[data-theme="panel"]) textarea,
-  :global(:root[data-theme="panel"]) .title {
+  :global(:root[data-family="panel"]) textarea,
+  :global(:root[data-family="panel"]) .title {
     font-family: var(--font-mono);
   }
   .title::placeholder,
@@ -377,7 +377,7 @@
     font-size: 11.5px;
     color: var(--muted);
   }
-  :global(:root[data-theme="panel"]) .meta {
+  :global(:root[data-family="panel"]) .meta {
     font-family: var(--font-mono);
   }
   .tag {

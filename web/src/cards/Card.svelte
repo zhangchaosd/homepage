@@ -124,7 +124,7 @@
     padding: var(--card-pad-y) var(--card-pad-x) 0;
     margin-bottom: 20px;
   }
-  :global(:root[data-theme="panel"]) header,
+  :global(:root[data-family="panel"]) header,
   :global(:root[data-theme="swiss"]) header {
     align-items: center;
     padding-bottom: var(--card-pad-y);
@@ -141,7 +141,7 @@
     gap: 14px;
     min-width: 0;
   }
-  :global(:root[data-theme="panel"]) .title,
+  :global(:root[data-family="panel"]) .title,
   :global(:root[data-theme="swiss"]) .title {
     align-items: center;
     gap: 10px;
@@ -149,7 +149,7 @@
   .num {
     color: var(--muted);
   }
-  :global(:root[data-theme="panel"]) .num::before {
+  :global(:root[data-family="panel"]) .num::before {
     content: "";
     display: inline-block;
     width: 6px;
@@ -168,7 +168,7 @@
     line-height: 1;
     white-space: nowrap;
   }
-  :global(:root[data-theme="panel"]) h2 {
+  :global(:root[data-family="panel"]) h2 {
     text-transform: uppercase;
     color: var(--ink-2);
   }
@@ -178,7 +178,7 @@
     display: none;
     color: var(--muted);
   }
-  :global(:root[data-theme="panel"]) .glyph,
+  :global(:root[data-family="panel"]) .glyph,
   :global(:root[data-theme="swiss"]) .glyph {
     display: inline-flex;
   }

@@ -2,16 +2,28 @@
  *
  * The server supplies a default theme; the viewer's choice is kept in
  * localStorage. Both are applied as `data-theme` / `data-mode` on <html>, which
- * app.css keys all tokens off. */
+ * app.css keys all tokens off. `data-family` names the structure a theme is
+ * built on (ruled, panel or swiss), so components style a family once and the
+ * newer themes (themes/*.css) only add their own look on top. */
 
-export type ThemeName = "paper" | "panel" | "swiss";
+export type ThemeName = "paper" | "panel" | "swiss" | "scifi" | "future";
 export type Mode = "auto" | "light" | "dark";
 
 export const THEMES: { id: ThemeName; name: string; blurb: string }[] = [
   { id: "paper", name: "晨报", blurb: "衬线字、细线栏目、纸色与红墨" },
   { id: "panel", name: "控制台", blurb: "等宽读数、指示灯、琥珀色面板" },
   { id: "swiss", name: "工作台", blurb: "粗黑标题、硬边框、色块与宝蓝" },
+  { id: "scifi", name: "科幻", blurb: "舰桥 HUD、角标边框、青色读数" },
+  { id: "future", name: "未来", blurb: "陶瓷与光、大圆角、紫色与荧光绿" },
 ];
+
+const FAMILY: Record<ThemeName, "ruled" | "panel" | "swiss"> = {
+  paper: "ruled",
+  panel: "panel",
+  swiss: "swiss",
+  scifi: "panel",
+  future: "panel",
+};
 
 const THEME_KEY = "hp-theme";
 const MODE_KEY = "hp-mode";
@@ -33,7 +45,7 @@ function write(key: string, value: string | null) {
   }
 }
 
-const isTheme = (value: unknown): value is ThemeName => value === "paper" || value === "panel" || value === "swiss";
+const isTheme = (value: unknown): value is ThemeName => THEMES.some((item) => item.id === value);
 const isMode = (value: unknown): value is Mode => value === "auto" || value === "light" || value === "dark";
 
 export const theme = $state<{ name: ThemeName; mode: Mode; serverDefault: ThemeName; overridden: boolean }>({
@@ -46,6 +58,7 @@ export const theme = $state<{ name: ThemeName; mode: Mode; serverDefault: ThemeN
 function apply() {
   const root = document.documentElement;
   root.dataset.theme = theme.name;
+  root.dataset.family = FAMILY[theme.name];
   root.dataset.mode = theme.mode;
   // Tokens use light-dark(), so the root's color-scheme decides the palette.
   root.style.colorScheme = theme.mode === "auto" ? "light dark" : theme.mode;

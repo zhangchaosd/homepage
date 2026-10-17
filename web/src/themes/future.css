@@ -1,0 +1,305 @@
+/* =====================================================================
+   未来 future — ceramic and light. Built on the panel family; this file
+   sets its tokens and the signature shapes: a floating capsule masthead,
+   glass cards with large radii, thin wide numerals, a ring for services
+   online and a dock of app icons.
+
+   Rules under :root[data-theme="future"]:not(#_) carry an id's weight so
+   they win over the components' scoped panel-family rules.
+   ===================================================================== */
+
+:root[data-theme="future"] {
+  --font-sans: "Manrope Variable", -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC",
+    sans-serif;
+  --font-wide: "Unbounded Variable", "PingFang SC", "Microsoft YaHei", sans-serif;
+
+  --bg: light-dark(#f1f0f5, #0b0a11);
+  --bg-2: light-dark(#e9e8f0, #110f18);
+  --surface: light-dark(rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.045));
+  --surface-2: light-dark(#f4f3f8, rgba(255, 255, 255, 0.05));
+  --surface-hover: light-dark(#ebe9f3, rgba(255, 255, 255, 0.08));
+  --ink: light-dark(#14121c, #f2f0fa);
+  --ink-2: light-dark(#46425a, #bdb8d3);
+  --muted: light-dark(#7a7690, #8a85a3);
+  --faint: light-dark(#bdb9cc, #4a4660);
+  --line: light-dark(rgba(20, 18, 28, 0.14), rgba(255, 255, 255, 0.14));
+  --hair: light-dark(rgba(20, 18, 28, 0.08), rgba(255, 255, 255, 0.09));
+  --hair-soft: light-dark(rgba(20, 18, 28, 0.05), rgba(255, 255, 255, 0.05));
+  --accent: light-dark(#5b3dff, #9d8bff);
+  --accent-ink: light-dark(#4a2ee6, #b9abff);
+  --accent-soft: light-dark(rgba(91, 61, 255, 0.1), rgba(157, 139, 255, 0.14));
+  --on-accent: light-dark(#ffffff, #0b0a11);
+  --live: light-dark(#7fb300, #d4ff3a);
+  --ok: var(--live);
+  --ok-soft: light-dark(rgba(127, 179, 0, 0.14), rgba(212, 255, 58, 0.12));
+  --warn: light-dark(#e0631f, #ff9a5c);
+  --warn-soft: light-dark(rgba(224, 99, 31, 0.12), rgba(255, 154, 92, 0.14));
+  --danger: light-dark(#e0324f, #ff5d78);
+  --danger-soft: light-dark(rgba(224, 50, 79, 0.08), rgba(255, 93, 120, 0.1));
+  --data: var(--accent);
+  --ring-hole: light-dark(#ffffff, #14121d);
+  --glass-edge: light-dark(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.08));
+  --heat-0: light-dark(rgba(20, 18, 28, 0.06), rgba(255, 255, 255, 0.06));
+  --heat-1: light-dark(#d9d1ff, #2c2550);
+  --heat-2: light-dark(#ad9cff, #4a3d99);
+  --heat-3: light-dark(#7d63ff, #7a66e6);
+  --heat-4: light-dark(#4a2ee6, #b9abff);
+
+  --font-display: var(--font-wide);
+  --font-heading: var(--font-wide);
+  --font-number: var(--font-wide);
+  --w-display: 400;
+  --w-heading: 400;
+  --w-number: 300;
+  --ls-display: -0.045em;
+  --ls-heading: -0.03em;
+  --ls-number: -0.05em;
+  --size-heading: 19px;
+  --size-display: clamp(44px, 5.6vw, 76px);
+  --lh-display: 1.02;
+  --transform-label: none;
+  --ls-label: 0.02em;
+
+  --card-bg: var(--surface);
+  --card-border: var(--glass-edge);
+  --card-border-w: 1px;
+  --card-radius: 28px;
+  --card-shadow: 0 1px 0 light-dark(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.06)) inset,
+    0 24px 48px -28px light-dark(rgba(46, 32, 120, 0.28), rgba(0, 0, 0, 0.8));
+  --card-pad-x: 22px;
+  --card-pad-y: 20px;
+  --section-rule: transparent;
+  --section-rule-sub: transparent;
+  --col-rule: transparent;
+  --head-rule: transparent;
+  --tile-bg: var(--surface-2);
+  --tile-border: transparent;
+  --tile-radius: 18px;
+  --tile-gap: 8px;
+  --tile-grid-bg: transparent;
+  --input-bg: var(--surface-2);
+  --input-border: var(--hair);
+  --input-radius: 16px;
+  --btn-bg: var(--accent);
+  --btn-fg: var(--on-accent);
+  --btn-radius: 999px;
+  --chip-radius: 999px;
+}
+
+/* Two soft lights over the ceramic. */
+:root[data-theme="future"] body {
+  background-image: radial-gradient(900px 520px at 18% -8%, light-dark(rgba(91, 61, 255, 0.14), rgba(157, 139, 255, 0.22)), transparent 70%),
+    radial-gradient(700px 420px at 92% 4%, light-dark(rgba(154, 212, 0, 0.12), rgba(212, 255, 58, 0.08)), transparent 70%);
+  background-repeat: no-repeat;
+}
+
+/* Glass. */
+:root[data-theme="future"]:not(#_) :is(section.card, .mast, dialog) {
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+}
+:root[data-theme="future"]:not(#_) .label {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Masthead: a floating capsule, centered. */
+:root[data-theme="future"]:not(#_) .page > .mast {
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+  border-radius: 999px;
+  border-color: var(--glass-edge);
+  padding: 6px 6px 6px 18px;
+  gap: 14px;
+}
+:root[data-theme="future"]:not(#_) .brand {
+  font-family: var(--font-wide);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  text-transform: lowercase;
+}
+:root[data-theme="future"]:not(#_) .brand .period {
+  color: var(--live);
+}
+:root[data-theme="future"]:not(#_) .search {
+  border-radius: 999px;
+  border-color: transparent;
+  background: var(--surface-2);
+  padding-inline: 14px;
+}
+:root[data-theme="future"]:not(#_) .stamp .time {
+  color: var(--ink-2);
+}
+
+/* Hero: the name in accent at a lighter weight; services online as a ring,
+   the other figures as glass capsules beside it. */
+:root[data-theme="future"]:not(#_) h1 em {
+  color: var(--accent);
+  font-weight: 300;
+}
+:root[data-theme="future"]:not(#_) .tagline {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  color: var(--ink-2);
+}
+:root[data-theme="future"]:not(#_) .index {
+  grid-template-columns: 150px minmax(0, 1fr);
+  grid-auto-rows: minmax(44px, auto);
+  gap: 8px 12px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+  align-items: stretch;
+}
+:root[data-theme="future"]:not(#_) .index li {
+  border: 1px solid var(--glass-edge);
+  border-radius: 20px;
+  background: var(--surface);
+  box-shadow: var(--card-shadow);
+}
+:root[data-theme="future"]:not(#_) .index li:last-child {
+  border-right: 1px solid var(--glass-edge);
+}
+:root[data-theme="future"]:not(#_) .index a {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  padding: 8px 18px;
+}
+:root[data-theme="future"]:not(#_) .index a:hover {
+  padding-left: 18px;
+  background: transparent;
+}
+:root[data-theme="future"]:not(#_) .index .k {
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+:root[data-theme="future"]:not(#_) .index .n {
+  font-size: 24px;
+  color: var(--ink);
+}
+:root[data-theme="future"]:not(#_) .index li[data-key="todo"] .n {
+  color: var(--warn);
+}
+/* The ring: the first figure spans the rows and fills to its ratio. */
+:root[data-theme="future"]:not(#_) .index li:first-child {
+  grid-row: span 3;
+  align-self: center;
+  width: 150px;
+  height: 150px;
+  border: 0;
+  border-radius: 50%;
+  background: conic-gradient(var(--accent) 0 calc(var(--pct, 1) * 100%), var(--danger) 0 100%);
+  box-shadow: 0 0 60px -14px var(--accent);
+  padding: 9px;
+}
+:root[data-theme="future"]:not(#_) .index li:first-child a {
+  flex-direction: column-reverse;
+  justify-content: center;
+  gap: 4px;
+  border-radius: 50%;
+  background: var(--ring-hole);
+  padding: 0;
+}
+:root[data-theme="future"]:not(#_) .index li:first-child .n {
+  font-size: 38px;
+}
+:root[data-theme="future"]:not(#_) .index li:first-child .dot {
+  display: none;
+}
+
+/* Modules: wide-type titles, no codes, no rules under the header. */
+:root[data-theme="future"]:not(#_) section.card header :is(.num, .glyph) {
+  display: none;
+}
+:root[data-theme="future"]:not(#_) section.card h2 {
+  color: var(--ink);
+  text-transform: none;
+  font-size: var(--size-heading);
+}
+:root[data-theme="future"]:not(#_) section.card header {
+  border-bottom: 0;
+  margin-bottom: 8px;
+}
+:root[data-theme="future"]:not(#_) section.card .figure {
+  color: var(--ink);
+}
+
+/* Rows become soft wells. */
+:root[data-theme="future"]:not(#_) section.card li {
+  border-top: 0;
+}
+:root[data-theme="future"]:not(#_) .check {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border-width: 1.5px;
+}
+
+/* Services: a dock of app icons. */
+:root[data-theme="future"]:not(#_) .grid li {
+  outline: 0;
+}
+:root[data-theme="future"]:not(#_) .tile {
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  min-height: 0;
+  padding: 14px 6px 12px;
+  border: 0;
+  border-radius: 22px;
+  background: transparent;
+  text-align: center;
+}
+:root[data-theme="future"]:not(#_) .tile:hover {
+  background: var(--surface-2);
+}
+:root[data-theme="future"]:not(#_) .tile .glyph {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  border: 1px solid var(--glass-edge);
+  background: linear-gradient(160deg, light-dark(#ffffff, rgba(255, 255, 255, 0.12)), light-dark(#ecebf3, rgba(255, 255, 255, 0.03)));
+  box-shadow: 0 1px 0 light-dark(#ffffff, rgba(255, 255, 255, 0.08)) inset, 0 8px 16px -10px light-dark(rgba(46, 32, 120, 0.5), #000);
+  color: var(--ink);
+}
+:root[data-theme="future"]:not(#_) .tile .text {
+  flex: none;
+  justify-items: center;
+}
+:root[data-theme="future"]:not(#_) .tile .name {
+  font-size: 12.5px;
+}
+:root[data-theme="future"]:not(#_) .tile .sub {
+  display: none;
+}
+:root[data-theme="future"]:not(#_) .tile .dot {
+  top: 12px;
+  right: calc(50% - 32px);
+}
+:root[data-theme="future"]:not(#_) .dot {
+  box-shadow: 0 0 8px light-dark(transparent, var(--live));
+}
+
+/* Phones: the capsule spans the width so the search keeps its room. */
+@media (max-width: 760px) {
+  :root[data-theme="future"]:not(#_) .page > .mast {
+    width: 100%;
+    border-radius: 26px;
+  }
+  :root[data-theme="future"]:not(#_) .index li:first-child {
+    width: 132px;
+    height: 132px;
+  }
+  :root[data-theme="future"]:not(#_) .index {
+    grid-template-columns: 132px minmax(0, 1fr);
+  }
+}

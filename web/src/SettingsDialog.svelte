@@ -284,7 +284,7 @@
     font-size: 22px;
     letter-spacing: var(--ls-heading);
   }
-  :global(:root[data-theme="panel"]) h2 {
+  :global(:root[data-family="panel"]) h2 {
     font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 0.14em;
@@ -310,7 +310,7 @@
 
   .themes {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 8px;
   }
   .theme {
@@ -350,6 +350,12 @@
   .swatch[data-swatch="panel"] i:nth-child(1) { background: #0a0b0b; border: 1px solid #2a302f; }
   .swatch[data-swatch="panel"] i:nth-child(2) { background: #161919; border: 1px solid #2a302f; }
   .swatch[data-swatch="panel"] i:nth-child(3) { background: #f5a524; }
+  .swatch[data-swatch="scifi"] i:nth-child(1) { background: #04070c; border: 1px solid #1c4652; }
+  .swatch[data-swatch="scifi"] i:nth-child(2) { background: #08111a; border: 1px solid #3ee6ff; }
+  .swatch[data-swatch="scifi"] i:nth-child(3) { background: #3ee6ff; }
+  .swatch[data-swatch="future"] i:nth-child(1) { background: #f1f0f5; border: 1px solid #ffffff; border-radius: 6px; }
+  .swatch[data-swatch="future"] i:nth-child(2) { background: #5b3dff; border-radius: 6px; }
+  .swatch[data-swatch="future"] i:nth-child(3) { background: #d4ff3a; border-radius: 6px; }
   .swatch[data-swatch="swiss"] i:nth-child(1) { background: #f6f6f3; border: 1.5px solid #0d0d0c; }
   .swatch[data-swatch="swiss"] i:nth-child(2) { background: #0d0d0c; }
   .swatch[data-swatch="swiss"] i:nth-child(3) { background: #1f3fd6; }

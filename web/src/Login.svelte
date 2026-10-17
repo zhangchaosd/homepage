@@ -130,7 +130,7 @@
       transform: translateY(10px);
     }
   }
-  :global(:root[data-theme="panel"]) .sheet,
+  :global(:root[data-family="panel"]) .sheet,
   :global(:root[data-theme="swiss"]) .sheet {
     width: min(100%, 760px);
     background: var(--card-bg);
@@ -147,7 +147,7 @@
     padding: 12px 0;
     border-bottom: 1px solid var(--line);
   }
-  :global(:root[data-theme="panel"]) .mast {
+  :global(:root[data-family="panel"]) .mast {
     border-bottom-color: var(--hair);
   }
   .brand {
@@ -157,7 +157,7 @@
   .brand .period {
     color: var(--accent);
   }
-  :global(:root[data-theme="panel"]) .brand,
+  :global(:root[data-family="panel"]) .brand,
   :global(:root[data-theme="swiss"]) .brand {
     font-style: normal;
     font-family: var(--font-mono);

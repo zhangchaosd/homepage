@@ -85,7 +85,7 @@
     background: var(--tile-grid-bg);
     border: 1px solid var(--tile-border);
   }
-  :global(:root[data-theme="panel"]) .grid {
+  :global(:root[data-family="panel"]) .grid {
     border: 0;
     background: transparent;
   }
@@ -101,7 +101,7 @@
     background: var(--tile-bg);
     border-radius: var(--tile-radius);
   }
-  :global(:root[data-theme="panel"]) .cell {
+  :global(:root[data-family="panel"]) .cell {
     border: 1px solid var(--tile-border);
   }
   .icon {
@@ -123,10 +123,10 @@
     text-overflow: ellipsis;
     padding-top: 6px;
   }
-  :global(:root[data-theme="panel"]) .value {
+  :global(:root[data-family="panel"]) .value {
     font-size: 28px;
   }
-  :global(:root[data-theme="panel"]) .cell.active .value {
+  :global(:root[data-family="panel"]) .cell.active .value {
     color: var(--ok);
   }
   .value small {
@@ -143,7 +143,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  :global(:root[data-theme="panel"]) .name,
+  :global(:root[data-family="panel"]) .name,
   :global(:root[data-theme="swiss"]) .name {
     font-family: var(--font-mono);
     font-size: 10.5px;
