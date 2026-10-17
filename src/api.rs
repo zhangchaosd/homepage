@@ -286,6 +286,8 @@ pub async fn inbox_send(
     )
     .await
     .map_err(AppError::Upstream)?;
+    // The new entry should show up in the recent list right away.
+    state.hub.wake(Widget::Inbox);
     Ok(Json(receipt))
 }
 

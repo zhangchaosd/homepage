@@ -76,7 +76,14 @@ HA = {
 }
 
 
-INBOX = {"instance_id": "dfb5b8e8-9171-479e-aa8e-db2b23c13e02", "data_generation": "776aad66-abfe-4775-8405-4926568cfe47", "items": []}
+INBOX = {"instance_id": "dfb5b8e8-9171-479e-aa8e-db2b23c13e02", "data_generation": "776aad66-abfe-4775-8405-4926568cfe47", "items": [
+    {"key": "seed-1", "item_id": "seed-1", "summary": {"title": "", "summary": "电梯里想到的：主页加一个收件箱卡片", "kind": "text", "created_at": iso(NOW - timedelta(minutes=35)),
+     "pinned": True, "expires_at": None, "source": {"kind": "ios_share", "label": "iPhone"}, "attachment_count": 0}},
+    {"key": "seed-2", "item_id": "seed-2", "summary": {"title": "Caddy reverse_proxy 文档", "summary": "https://caddyserver.com/docs/caddyfile/directives/reverse_proxy", "kind": "link",
+     "created_at": iso(NOW - timedelta(hours=5)), "pinned": False, "expires_at": iso(NOW + timedelta(hours=9)), "source": {"kind": "web", "label": None}, "attachment_count": 0}},
+    {"key": "seed-3", "item_id": "seed-3", "summary": {"title": "发票扫描", "summary": "2 个附件", "kind": "image", "created_at": iso(NOW - timedelta(days=2)),
+     "pinned": False, "expires_at": iso(NOW + timedelta(days=5)), "source": {"kind": "ios_app", "label": "iPad"}, "attachment_count": 2}},
+]}
 INBOX_TOKEN = "Bearer dev-inbox-token"
 
 
@@ -127,7 +134,13 @@ class Handler(BaseHTTPRequestHandler):
             if self.headers.get("authorization") != INBOX_TOKEN:
                 return self.send(401, {"error": {"code": "authentication_required"}})
             return self.send(200, {"authentication": "script", "grant_id": "g1", "expires_at": iso(NOW + timedelta(days=21)),
-                                   "scopes": ["ingest:write", "receipts:read_own"], "max_ttl_seconds": 2592000})
+                                   "scopes": ["ingest:write", "receipts:read_own", "items:read"], "max_ttl_seconds": 3153600000})
+        if path == "/inbox/api/v1/items":
+            if self.headers.get("authorization") != INBOX_TOKEN:
+                return self.send(401, {"error": {"code": "authentication_required"}})
+            items = sorted((dict(i["summary"], id=i["item_id"], version=1, preview_attachment_id=None) for i in INBOX["items"]),
+                           key=lambda i: i["created_at"], reverse=True)
+            return self.send(200, {"items": items[:6], "next_cursor": None})
         if path == "/vikunja/api/v1/tasks/all":
             # Vikunja 2.x removed this route; it now parses "all" as a task id.
             return self.send(400, {"code": 2004, "message": "Invalid model provided: Bad Request"})
@@ -181,7 +194,11 @@ class Handler(BaseHTTPRequestHandler):
                 return self.send(400, {"error": {"code": "invalid_request"}})
             existing = next((i for i in INBOX["items"] if i["key"] == key), None)
             if existing is None:
-                existing = {"key": key, "item_id": "%08x-0000-4000-8000-%012x" % (len(INBOX["items"]), len(INBOX["items"])), "manifest": body}
+                links = body.get("links") or []
+                existing = {"key": key, "item_id": "%08x-0000-4000-8000-%012x" % (len(INBOX["items"]), len(INBOX["items"])), "manifest": body,
+                            "summary": {"title": body.get("title") or "", "summary": (body.get("body_text") or "")[:120], "kind": "link" if links else "text",
+                                        "created_at": iso(datetime.now().astimezone()), "pinned": False, "expires_at": iso(NOW + timedelta(days=7)),
+                                        "source": body.get("source"), "attachment_count": 0}}
                 INBOX["items"].append(existing)
                 print("inbox received:", json.dumps({k: body.get(k) for k in ("title", "body_text", "links", "source")}, ensure_ascii=False), flush=True)
             return self.send(201, {"receipt": {"client_submission_id": key, "item_id": existing["item_id"], "status": "committed",

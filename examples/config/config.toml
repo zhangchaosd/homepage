@@ -119,8 +119,9 @@ entities = [
   { id = "person.chao", name = "我" },
 ]
 
-# Cross-device inbox (inboxd): quick-send card using a write-only script token
-# created in the inbox settings page (key "inbox" in secrets.toml).
+# Cross-device inbox (inboxd): quick-send card. With a read-write token from the
+# inbox settings page (key "inbox" in secrets.toml) it also lists recent items.
 [inbox]
 url = "http://192.168.1.10:8766"
 link = "https://inbox.example.com"
+limit = 6

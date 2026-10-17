@@ -86,7 +86,18 @@ export type HaEntity = {
 };
 export type HomeAssistant = { entities: HaEntity[]; link: string };
 
-export type InboxStatus = { expiresAt: string | null; canSend: boolean; link: string };
+export type InboxItem = {
+  id: string;
+  title: string;
+  summary: string;
+  kind: "text" | "link" | "image" | "file" | "mixed";
+  createdAt: string;
+  pinned: boolean;
+  expiresAt: string | null;
+  attachments: number;
+  source: string | null;
+};
+export type InboxStatus = { expiresAt: string | null; canSend: boolean; recent: InboxItem[] | null; link: string };
 export type InboxReceipt = { item_id: string | null; status: string };
 
 export type Widgets = {

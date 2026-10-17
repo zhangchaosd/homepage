@@ -9,7 +9,7 @@
 - **GitHub**：资料、最近推送的仓库，配置 token 后显示贡献日历
 - **置顶书签**：bookmarkd 中置顶的书签（需要只读 token，见下文）
 - **家**：Home Assistant 中指定实体的状态
-- **收件箱**：在主页上直接投递文字和链接到 [跨设备收件箱](https://github.com/zhangchaosd/cross-device-inbox)（inboxd），正文中的网址自动识别为链接
+- **收件箱**：在主页上直接投递文字和链接到 [跨设备收件箱](https://github.com/zhangchaosd/cross-device-inbox)（inboxd），正文中的网址自动识别为链接；令牌可读时同时显示最近收件
 - `/` 或 `⌘K` 搜索服务和书签，回车打开第一个结果
 - **在线更新**：每天自动检查 GitHub Releases，右上角提示新版本，点"安装并重启"即可升级，无需重新部署
 
@@ -178,7 +178,7 @@ cd ~/homepage
 | GitHub | `username`；可选 token 用于贡献日历（GraphQL 需要认证） |
 | bookmarkd | v0.7.0+。在 bookmarkd 所在机器上运行 `bookmarkd token create homepage` 生成只读 token。`link` 必须是 bookmarkd 的 `public_url`：bookmarkd 只接受 Host 为该地址的请求，`url` 用局域网地址时主页会自动带上这个 Host |
 | Home Assistant | 长期访问令牌 + `entities` 列表 |
-| 收件箱（inboxd） | 在收件箱「设置」里用 Passkey 创建**只写**脚本令牌，写入 `secrets.toml` 的 `inbox`。`url` 填局域网地址（inboxd 不校验 Host），`link` 填公开地址。令牌到期前 30 天卡片会提醒 |
+| 收件箱（inboxd） | inboxd 0.3.1+：在收件箱「设置 → 令牌」里创建**读写**令牌（默认 100 年有效），写入 `secrets.toml` 的 `inbox`。读写令牌既能投递也能显示最近收件（`limit` 条，默认 6）；只写令牌只能投递。`url` 填局域网地址（inboxd 不校验 Host），`link` 填公开地址。令牌到期前 30 天卡片会提醒 |
 
 不需要的组件删掉对应配置段即可，卡片会自动重新排版。
 

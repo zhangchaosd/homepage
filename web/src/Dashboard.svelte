@@ -201,7 +201,7 @@
                 <span class="pill warn" title={w.inbox.error}><i></i>状态未知</span>
               {/if}
             {/snippet}
-            <Inbox status={w.inbox.data} link={dash.links.inbox} />
+            <Inbox status={w.inbox.data} link={dash.links.inbox} onsent={reload} />
           </Card>
         {/if}
       </div>

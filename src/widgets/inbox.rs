@@ -1,5 +1,5 @@
-//! Cross-device inbox (inboxd): token status for the card, and quick sends
-//! with inboxd's write-only script token.
+//! Cross-device inbox (inboxd): token status and, when the token may read,
+//! the most recent items for the card; quick sends with the script token.
 //!
 //! A send follows inboxd's ingest contract: read the public capabilities for
 //! the instance and data generation, then post one JSON manifest whose
@@ -23,6 +23,47 @@ struct Me {
     expires_at: Option<String>,
     #[serde(default)]
     scopes: Vec<String>,
+}
+
+#[derive(Deserialize)]
+struct ItemPage {
+    items: Vec<ItemSummary>,
+}
+
+#[derive(Deserialize)]
+struct ItemSummary {
+    id: String,
+    #[serde(default)]
+    title: String,
+    #[serde(default)]
+    summary: String,
+    kind: String,
+    created_at: String,
+    #[serde(default)]
+    pinned: bool,
+    expires_at: Option<String>,
+    #[serde(default)]
+    attachment_count: u32,
+    source: Option<Source>,
+}
+
+#[derive(Deserialize)]
+struct Source {
+    label: Option<String>,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ItemView {
+    id: String,
+    title: String,
+    summary: String,
+    kind: String,
+    created_at: String,
+    pinned: bool,
+    expires_at: Option<String>,
+    attachments: u32,
+    source: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -52,11 +93,42 @@ pub async fn fetch(client: &reqwest::Client, config: &Inbox) -> FetchResult {
     )
     .await?;
     let can_send = me.scopes.iter().any(|scope| scope == "ingest:write");
+    let can_read = me.scopes.iter().any(|scope| scope == "items:read");
+    // Recent items need a token that can read; a write-only token just sends.
+    let recent = if can_read {
+        let limit = config.limit.to_string();
+        let page: ItemPage = get_json(
+            client
+                .get(format!("{}/api/v1/items", config.url))
+                .bearer_auth(&config.token)
+                .query(&[("state", "active"), ("limit", limit.as_str())]),
+            "inbox",
+        )
+        .await?;
+        Some(page.items.into_iter().map(view).collect::<Vec<_>>())
+    } else {
+        None
+    };
     Ok(json!({
         "expiresAt": me.expires_at,
         "canSend": can_send,
+        "recent": recent,
         "link": config.link,
     }))
+}
+
+fn view(item: ItemSummary) -> ItemView {
+    ItemView {
+        id: item.id,
+        title: item.title,
+        summary: item.summary,
+        kind: item.kind,
+        created_at: item.created_at,
+        pinned: item.pinned,
+        expires_at: item.expires_at,
+        attachments: item.attachment_count,
+        source: item.source.and_then(|source| source.label),
+    }
 }
 
 /// Builds a manifest from free text: `text` is kept as the body and every

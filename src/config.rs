@@ -213,8 +213,11 @@ struct InboxSection {
     /// inboxd base URL, e.g. http://192.168.200.100:8766
     url: String,
     link: Option<String>,
-    /// Key in secrets.toml `[tokens]` holding a write-only script token; defaults to "inbox".
+    /// Key in secrets.toml `[tokens]` holding a script token; defaults to "inbox".
+    /// A token that can also read (`items:read`) adds the most recent items to the card.
     token: Option<String>,
+    #[serde(default = "default_inbox_limit")]
+    limit: usize,
     refresh: Option<u64>,
 }
 
@@ -243,6 +246,9 @@ fn default_commit_limit() -> usize {
     8
 }
 fn default_repo_limit() -> usize {
+    6
+}
+fn default_inbox_limit() -> usize {
     6
 }
 fn default_bookmark_limit() -> usize {
@@ -332,6 +338,7 @@ pub struct Inbox {
     pub url: String,
     pub link: String,
     pub token: String,
+    pub limit: usize,
     pub refresh: Duration,
 }
 
@@ -508,7 +515,8 @@ impl Config {
                         .link
                         .map_or_else(|| url.clone(), |link| base_url(&link)),
                     url,
-                    refresh: refresh(section.refresh, 600),
+                    limit: section.limit.clamp(1, 20),
+                    refresh: refresh(section.refresh, 120),
                 })
             })
             .transpose()?;
