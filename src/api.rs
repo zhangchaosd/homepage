@@ -23,6 +23,7 @@ use crate::{
 pub struct SystemResponse {
     version: &'static str,
     title: String,
+    theme: String,
     auth: AuthMethods,
 }
 
@@ -39,6 +40,7 @@ pub async fn system(State(state): State<AppState>) -> Json<SystemResponse> {
     Json(SystemResponse {
         version: env!("CARGO_PKG_VERSION"),
         title: profile.title.clone().unwrap_or_else(|| "Home".into()),
+        theme: profile.theme.clone().unwrap_or_else(|| "paper".into()),
         auth: AuthMethods {
             password: state.auth.password_enabled(),
             username: state.auth.username_required(),

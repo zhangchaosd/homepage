@@ -25,8 +25,7 @@
     try {
       await navigator.clipboard.writeText(address);
     } catch {
-      // Clipboard needs a secure context; select-and-copy still works on the text.
-      return;
+      return; // Clipboard needs a secure context; select-and-copy still works.
     }
     copied = address;
     clearTimeout(timer);
@@ -41,40 +40,31 @@
   const online = $derived(devices.filter((device) => device.address).length);
 </script>
 
-<div class="summary">
-  <span class="count tnum">{online}<span class="of">/{devices.length}</span></span>
+<p class="summary">
+  <span class="figure n tnum">{online}<small>/{devices.length}</small></span>
   <span class="caption">台设备有公网 IPv6</span>
-</div>
+</p>
 
 <ul>
   {#each devices as device (device.url)}
     {@const others = device.addresses.filter((a) => a.address !== device.address)}
     <li>
-      <span class="kind" class:offline={!device.address}>
-        <Icon name={iconFor(device)} size={17} />
-      </span>
+      <span class="kind" class:offline={!device.address}><Icon name={iconFor(device)} size={15} /></span>
       <div class="info">
         <div class="head">
           <span class="name" title={device.url}>{device.name}</span>
-          {#if device.osName}<span class="tag">{device.osName}</span>{/if}
-          {#if device.interface}<span class="tag mono">{device.interface}</span>{/if}
-          {#if device.addressType && device.addressType !== "static"}<span class="tag">{device.addressType}</span>{/if}
+          {#if device.osName}<span class="os mono">{device.osName}</span>{/if}
+          {#if device.interface}<span class="os mono">{device.interface}</span>{/if}
+          {#if device.addressType && device.addressType !== "static"}<span class="os mono">{device.addressType}</span>{/if}
         </div>
         {#if device.address}
-          <button
-            class="address mono pressable"
-            class:done={copied === device.address}
-            onclick={() => copy(device.address!)}
-            title="点击复制"
-          >
+          <button class="address mono pressable" class:done={copied === device.address} onclick={() => copy(device.address!)} title="点击复制">
             <span class="value">{#each segments(device.address) as part}<span class="seg">{part}</span>{/each}</span>
-            <span class="copy-icon" aria-hidden="true">
-              <Icon name={copied === device.address ? "check" : "copy"} size={13} stroke={2} />
-            </span>
+            <span class="copy-icon" aria-hidden="true"><Icon name={copied === device.address ? "check" : "copy"} size={12} stroke={2} /></span>
             <span class="visually-hidden" aria-live="polite">{copied === device.address ? "已复制" : ""}</span>
           </button>
           {#if others.length > 0}
-            <button class="more" onclick={() => (expanded[device.url] = !expanded[device.url])} aria-expanded={!!expanded[device.url]}>
+            <button class="more link" onclick={() => (expanded[device.url] = !expanded[device.url])} aria-expanded={!!expanded[device.url]}>
               {expanded[device.url] ? "收起" : `另有 ${others.length} 个地址`}
             </button>
             {#if expanded[device.url]}
@@ -102,22 +92,30 @@
   .summary {
     display: flex;
     align-items: baseline;
-    gap: 10px;
-    margin: 2px 0 10px;
+    gap: 12px;
+    margin: 0 0 12px;
   }
-  .count {
-    font-size: 34px;
-    font-weight: 600;
-    letter-spacing: -0.04em;
-    line-height: 1;
+  .n {
+    font-size: 64px;
   }
-  .of {
+  .n small {
+    font-size: 0.5em;
     color: var(--faint);
-    font-weight: 500;
+    font-weight: inherit;
+  }
+  :global(:root[data-theme="panel"]) .n {
+    font-size: 54px;
+    color: var(--accent);
   }
   .caption {
     color: var(--muted);
     font-size: 13px;
+  }
+  :global(:root[data-theme="panel"]) .caption {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
   ul {
@@ -125,12 +123,11 @@
     margin: 0;
     padding: 0;
   }
-
   li {
     display: flex;
     gap: 12px;
     padding: 11px 0;
-    border-top: 1px solid var(--line);
+    border-top: 1px solid var(--hair-soft);
   }
   li:first-child {
     border-top: 0;
@@ -140,16 +137,25 @@
     flex: none;
     display: grid;
     place-items: center;
-    width: 34px;
-    height: 34px;
-    border-radius: 10px;
-    background: var(--accent-soft);
-    color: var(--accent-ink);
+    width: 30px;
+    height: 30px;
+    margin-top: 1px;
+    color: var(--ink);
+  }
+  :global(:root[data-theme="panel"]) .kind,
+  :global(:root[data-theme="swiss"]) .kind {
+    background: var(--surface-2);
+    border: 1px solid var(--hair);
+    border-radius: var(--tile-radius);
+    color: var(--ink-2);
+  }
+  :global(:root[data-theme="swiss"]) .kind {
+    border-width: 1.5px;
+    border-color: var(--line);
+    background: var(--surface);
   }
   .kind.offline {
-    background: var(--surface-2);
     color: var(--faint);
-    border: 1px solid var(--line);
   }
 
   .info {
@@ -158,26 +164,20 @@
     min-width: 0;
     flex: 1;
   }
-
   .head {
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
-    gap: 4px 6px;
+    align-items: baseline;
+    gap: 4px 10px;
     min-width: 0;
   }
   .name {
     font-weight: 560;
     font-size: 13.5px;
   }
-  .tag {
+  .os {
     font-size: 11px;
-    padding: 0 6px;
-    border-radius: 5px;
-    background: var(--surface-2);
-    border: 1px solid var(--line);
     color: var(--muted);
-    line-height: 17px;
   }
 
   .address {
@@ -186,14 +186,16 @@
     gap: 8px;
     width: fit-content;
     max-width: 100%;
-    margin-left: -6px;
-    padding: 2px 6px;
-    border-radius: 7px;
+    margin-left: -4px;
+    padding: 1px 4px;
     text-align: left;
     font-size: 13px;
     color: var(--ink);
     -webkit-user-select: text;
     user-select: text;
+  }
+  :global(:root[data-theme="panel"]) .address {
+    color: var(--data);
   }
   .address.small {
     font-size: 12px;
@@ -213,7 +215,7 @@
   }
   .address.done .copy-icon {
     opacity: 1;
-    color: var(--accent);
+    color: var(--ok);
   }
   @media (hover: hover) and (pointer: fine) {
     .address:hover {
@@ -234,25 +236,23 @@
     color: var(--muted);
     white-space: nowrap;
   }
-
   .more {
     width: fit-content;
     font-size: 12px;
     color: var(--muted);
-    padding: 0;
-  }
-  @media (hover: hover) and (pointer: fine) {
-    .more:hover {
-      color: var(--ink);
-    }
   }
   .others li {
     padding: 2px 0;
     border: 0;
   }
-
   .error {
     font-size: 12.5px;
     color: var(--danger);
+  }
+  :global(:root[data-theme="panel"]) .error {
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    font-size: 11.5px;
+    letter-spacing: 0.04em;
   }
 </style>

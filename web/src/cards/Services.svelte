@@ -68,7 +68,7 @@
       <!-- Groups share a row, each taking width in proportion to its size. -->
       <section class="group" style:--n={items.length}>
         {#if group && groups.length > 1}
-          <h3>{group}</h3>
+          <h3 class="label">{group}</h3>
         {/if}
         <ul class="grid">
           {#each items as service (service.name)}
@@ -78,9 +78,9 @@
               <a class="tile pressable" href={service.url} target="_blank" rel="noopener noreferrer">
                 <span class="glyph" class:letter={g.kind === "letter"}>
                   {#if g.kind === "file"}
-                    <img src={g.value} alt="" width="22" height="22" loading="lazy" />
+                    <img src={g.value} alt="" width="20" height="20" loading="lazy" />
                   {:else if g.kind === "icon"}
-                    <Icon name={g.value} size={19} />
+                    <Icon name={g.value} size={18} />
                   {:else}
                     {g.value}
                   {/if}
@@ -111,28 +111,33 @@
   .groups {
     display: flex;
     flex-wrap: wrap;
-    gap: 14px 20px;
+    gap: 18px 32px;
   }
   .group {
-    flex: var(--n) 1 calc(var(--n) * 200px);
+    flex: var(--n) 1 calc(var(--n) * 190px);
     min-width: 0;
   }
   h3 {
-    margin: 2px 0 8px 2px;
-    font-size: 11.5px;
-    font-weight: 550;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--muted);
+    margin: 0 0 10px;
   }
 
+  /* A ruled table of tiles: 1px of the grid colour shows between cells. */
   .grid {
     list-style: none;
     margin: 0;
     padding: 0;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-    gap: 8px;
+    grid-template-columns: repeat(auto-fit, minmax(176px, 1fr));
+    gap: var(--tile-gap);
+    background: var(--tile-grid-bg);
+    border: 1px solid var(--tile-border);
+  }
+  :global(:root[data-theme="panel"]) .grid {
+    border: 0;
+    background: transparent;
+  }
+  :global(:root[data-theme="swiss"]) .grid {
+    border-width: 1.5px;
   }
 
   .tile {
@@ -140,41 +145,66 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 10px 12px 10px 10px;
-    border-radius: var(--radius-tile);
-    border: 1px solid var(--line);
-    background: var(--surface-2);
+    min-height: 68px;
+    padding: 12px 14px;
+    background: var(--tile-bg);
+    border-radius: var(--tile-radius);
+  }
+  :global(:root[data-theme="panel"]) .tile {
+    border: 1px solid var(--tile-border);
   }
   @media (hover: hover) and (pointer: fine) {
     .tile:hover {
       background: var(--surface-hover);
-      border-color: var(--line-strong);
     }
-    .tile:hover .glyph {
-      color: var(--ink);
+    :global(:root[data-theme="swiss"]) .tile:hover {
+      background: var(--accent);
+      color: var(--on-accent);
+    }
+    :global(:root[data-theme="swiss"]) .tile:hover .sub {
+      color: var(--on-accent);
+      opacity: 0.7;
+    }
+    :global(:root[data-theme="swiss"]) .tile:hover .glyph {
+      background: var(--on-accent);
+      color: var(--accent);
     }
   }
 
+  /* Paper: the mark is bare ink. Panel: a keycap. Swiss: a black square. */
   .glyph {
     flex: none;
     display: grid;
     place-items: center;
-    width: 38px;
-    height: 38px;
-    border-radius: 11px;
-    background: var(--surface);
-    border: 1px solid var(--line);
-    color: var(--ink-2);
-    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.03);
-    transition: color 160ms ease;
+    width: 36px;
+    height: 36px;
+    color: var(--ink);
+    transition: background-color 160ms ease, color 160ms ease;
   }
   .glyph.letter {
-    font-weight: 650;
-    font-size: 15px;
+    font-family: var(--font-number);
+    font-weight: var(--w-number);
+    font-size: 20px;
+    font-style: italic;
   }
   .glyph img {
-    border-radius: 5px;
     object-fit: contain;
+  }
+  :global(:root[data-theme="panel"]) .glyph {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    color: var(--accent);
+  }
+  :global(:root[data-theme="panel"]) .glyph.letter,
+  :global(:root[data-theme="swiss"]) .glyph.letter {
+    font-style: normal;
+    font-size: 15px;
+    font-weight: 700;
+  }
+  :global(:root[data-theme="swiss"]) .glyph {
+    background: var(--ink);
+    color: var(--bg);
   }
 
   .text {
@@ -195,21 +225,12 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    transition: color 160ms ease;
   }
-
-  .dot {
+  .tile .dot {
     position: absolute;
-    top: 9px;
-    right: 9px;
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-soft);
-  }
-  .dot.down {
-    background: var(--danger);
-    box-shadow: 0 0 0 3px var(--danger-soft);
+    top: 12px;
+    right: 12px;
   }
 
   .empty {
@@ -217,22 +238,22 @@
     color: var(--muted);
     font-size: 13px;
   }
+
   @media (max-width: 760px) {
     .group {
       flex-basis: 100%;
     }
-    /* Two compact columns on phones keep the launcher within a screen or so. */
     .grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
     .tile {
       gap: 9px;
-      padding: 8px 9px 8px 8px;
+      padding: 10px;
+      min-height: 60px;
     }
     .glyph {
-      width: 32px;
-      height: 32px;
-      border-radius: 9px;
+      width: 30px;
+      height: 30px;
     }
   }
 </style>

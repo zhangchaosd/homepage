@@ -30,10 +30,10 @@
 
 {#if data.heatmap.length > 0}
   <div class="activity">
-    <div class="summary">
-      <span class="count tnum">{recentTotal}</span>
+    <p class="summary">
+      <span class="figure n tnum">{recentTotal}</span>
       <span class="caption">次贡献 · 近半年</span>
-    </div>
+    </p>
     <Heatmap {counts} maxWeeks={26} end={new Date(now.value)} label="Forgejo 近半年贡献热力图" />
   </div>
 {/if}
@@ -44,15 +44,12 @@
   <ol class="commits">
     {#each data.commits as commit (commit.sha + commit.repo)}
       <li>
-        <span class="rail" aria-hidden="true"><Icon name="commit" size={14} /></span>
-        <div class="content">
-          <a class="title" href={commit.url} target="_blank" rel="noopener noreferrer">{commit.title || "(无提交信息)"}</a>
-          <div class="meta">
-            <a class="repo" href={commit.repoUrl} target="_blank" rel="noopener noreferrer">{short(commit.repo)}</a>
-            {#if commit.branch}<span class="branch"><Icon name="branch" size={11} />{commit.branch}</span>{/if}
-            <span class="sha mono">{commit.sha.slice(0, 7)}</span>
-            <span class="time tnum">{ago(commit.time, now.value)}</span>
-          </div>
+        <a class="title" href={commit.url} target="_blank" rel="noopener noreferrer">{commit.title || "(无提交信息)"}</a>
+        <div class="meta">
+          <a class="repo link" href={commit.repoUrl} target="_blank" rel="noopener noreferrer">{short(commit.repo)}</a>
+          {#if commit.branch}<span class="branch"><Icon name="branch" size={11} />{commit.branch}</span>{/if}
+          <span class="sha mono">{commit.sha.slice(0, 7)}</span>
+          <span class="time tnum">{ago(commit.time, now.value)}</span>
         </div>
       </li>
     {/each}
@@ -61,25 +58,30 @@
 
 <style>
   .activity {
-    margin-bottom: 14px;
-    padding-bottom: 14px;
-    border-bottom: 1px solid var(--line);
+    margin-bottom: 16px;
   }
   .summary {
     display: flex;
     align-items: baseline;
-    gap: 10px;
-    margin: 2px 0 10px;
+    gap: 12px;
+    margin: 0 0 12px;
   }
-  .count {
-    font-size: 34px;
-    font-weight: 600;
-    letter-spacing: -0.04em;
-    line-height: 1;
+  .n {
+    font-size: 64px;
+  }
+  :global(:root[data-theme="panel"]) .n {
+    font-size: 54px;
+    color: var(--accent);
   }
   .caption {
     color: var(--muted);
     font-size: 13px;
+  }
+  :global(:root[data-theme="panel"]) .caption {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
   .commits {
@@ -88,33 +90,13 @@
     padding: 0;
   }
   li {
-    position: relative;
-    display: flex;
-    gap: 10px;
-    padding: 6px 0;
-  }
-  /* A thin timeline connecting the commit dots. */
-  li:not(:last-child)::before {
-    content: "";
-    position: absolute;
-    left: 8.5px;
-    top: 26px;
-    bottom: -8px;
-    width: 1px;
-    background: var(--line-strong);
-  }
-  .rail {
-    flex: none;
     display: grid;
-    place-items: center;
-    width: 18px;
-    height: 20px;
-    color: var(--faint);
+    gap: 3px;
+    padding: 9px 0;
+    border-top: 1px solid var(--hair-soft);
   }
-  .content {
-    display: grid;
-    gap: 2px;
-    min-width: 0;
+  li:first-child {
+    border-top: 0;
   }
   .title {
     font-size: 13.5px;
@@ -122,10 +104,10 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    transition: color 160ms ease;
   }
   @media (hover: hover) and (pointer: fine) {
-    .title:hover,
-    .repo:hover {
+    .title:hover {
       color: var(--accent-ink);
     }
   }
@@ -133,9 +115,13 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 2px 10px;
+    gap: 2px 12px;
     font-size: 12px;
     color: var(--muted);
+  }
+  :global(:root[data-theme="panel"]) .meta {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
   }
   .repo {
     color: var(--ink-2);
@@ -148,6 +134,10 @@
   }
   .sha {
     font-size: 11.5px;
+  }
+  :global(:root[data-theme="panel"]) .sha,
+  :global(:root[data-theme="swiss"]) .sha {
+    color: var(--accent);
   }
   .empty {
     color: var(--muted);

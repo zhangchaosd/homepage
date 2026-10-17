@@ -8,13 +8,6 @@
     if (!q) return items;
     return items.filter((item) => [item.title, item.host, ...item.tags].some((field) => field.toLowerCase().includes(q)));
   });
-
-  /** A stable, gentle hue per host for monogram tiles. */
-  function hue(text: string) {
-    let hash = 0;
-    for (const char of text) hash = (hash * 31 + char.charCodeAt(0)) | 0;
-    return Math.abs(hash) % 360;
-  }
 </script>
 
 {#if items.length === 0}
@@ -22,18 +15,18 @@
 {:else if visible.length === 0}
   <p class="empty">没有匹配的书签</p>
 {:else}
-  <ul class="grid">
+  <ul>
     {#each visible as item (item.id)}
       <li>
-        <a class="item pressable" href={item.url} target="_blank" rel="noopener noreferrer" title={item.url}>
+        <a class="item" href={item.url} target="_blank" rel="noopener noreferrer" title={item.url}>
           {#if item.icon}
-            <img class="favicon" src={item.icon} alt="" width="20" height="20" loading="lazy" />
+            <img class="mark" src={item.icon} alt="" width="18" height="18" loading="lazy" />
           {:else}
-            <span class="favicon monogram" style:--h={hue(item.host)}>{Array.from(item.title.trim())[0]?.toUpperCase() ?? "#"}</span>
+            <span class="mark monogram figure">{Array.from(item.title.trim())[0]?.toUpperCase() ?? "#"}</span>
           {/if}
           <span class="text">
             <span class="title">{item.title}</span>
-            <span class="host">{item.host}</span>
+            <span class="host mono">{item.host}</span>
           </span>
         </a>
       </li>
@@ -42,54 +35,77 @@
 {/if}
 
 <style>
-  .grid {
+  ul {
     list-style: none;
     margin: 0;
     padding: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(188px, 1fr));
-    gap: 4px 8px;
   }
-
+  li {
+    border-top: 1px solid var(--hair-soft);
+  }
+  li:first-child {
+    border-top: 0;
+  }
   .item {
     display: flex;
     align-items: center;
-    gap: 11px;
-    padding: 8px 10px;
-    margin: 0 -2px;
-    border-radius: 11px;
+    gap: 12px;
+    padding: 8px 0;
+    transition: padding-left 220ms var(--ease-out), color 160ms ease;
   }
   @media (hover: hover) and (pointer: fine) {
     .item:hover {
-      background: var(--surface-hover);
+      padding-left: 4px;
+      color: var(--accent-ink);
     }
   }
 
-  .favicon {
+  /* Paper: an italic initial in a ring. Panel: a keycap. Swiss: a black square. */
+  .mark {
     flex: none;
-    width: 28px;
-    height: 28px;
-    padding: 4px;
-    border-radius: 8px;
-    background: var(--surface);
-    border: 1px solid var(--line);
-    object-fit: contain;
-  }
-  .monogram {
     display: grid;
     place-items: center;
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--hair);
+    border-radius: 50%;
+    object-fit: contain;
     padding: 0;
-    font-size: 12.5px;
-    font-weight: 650;
-    color: oklch(0.45 0.09 var(--h));
-    background: oklch(0.95 0.03 var(--h));
-    border-color: transparent;
   }
-  @media (prefers-color-scheme: dark) {
-    .monogram {
-      color: oklch(0.82 0.08 var(--h));
-      background: oklch(0.3 0.04 var(--h));
-    }
+  img.mark {
+    padding: 4px;
+    background: var(--surface);
+  }
+  .monogram {
+    font-size: 15px;
+    font-style: italic;
+    color: var(--ink);
+  }
+  :global(:root[data-theme="panel"]) .mark {
+    border-radius: 5px;
+    background: var(--bg);
+    border-color: var(--line);
+  }
+  :global(:root[data-theme="panel"]) .monogram {
+    font-style: normal;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 12px;
+    color: var(--ink-2);
+  }
+  :global(:root[data-theme="swiss"]) .mark {
+    border-radius: 0;
+    border: 0;
+    background: var(--ink);
+  }
+  :global(:root[data-theme="swiss"]) .monogram {
+    font-style: normal;
+    font-size: 12px;
+    color: var(--bg);
+  }
+  :global(:root[data-theme="swiss"]) img.mark {
+    background: var(--surface);
+    border: 1.5px solid var(--line);
   }
 
   .text {
@@ -104,13 +120,12 @@
     white-space: nowrap;
   }
   .host {
-    font-size: 12px;
+    font-size: 11.5px;
     color: var(--muted);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-
   .empty {
     margin: 4px 0;
     color: var(--muted);

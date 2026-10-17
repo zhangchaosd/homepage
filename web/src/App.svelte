@@ -3,8 +3,13 @@
   import Login from "./Login.svelte";
   import Dashboard from "./Dashboard.svelte";
   import { ApiError, getDashboard, getSystem, restoreSession, type Dashboard as DashboardData, type SystemInfo } from "./lib/api";
+  import { initTheme } from "./lib/theme.svelte";
 
-  type View = { kind: "loading" } | { kind: "login"; system: SystemInfo } | { kind: "dashboard"; data: DashboardData } | { kind: "error"; message: string };
+  type View =
+    | { kind: "loading" }
+    | { kind: "login"; system: SystemInfo }
+    | { kind: "dashboard"; data: DashboardData }
+    | { kind: "error"; message: string };
 
   let view = $state<View>({ kind: "loading" });
 
@@ -12,6 +17,7 @@
     await restoreSession();
     const data = await getDashboard();
     if (data.profile.title) document.title = data.profile.title;
+    initTheme(data.profile.theme ?? "paper");
     view = { kind: "dashboard", data };
   }
 
@@ -23,6 +29,7 @@
         try {
           const system = await getSystem();
           document.title = system.title;
+          initTheme(system.theme);
           view = { kind: "login", system };
         } catch (inner) {
           view = { kind: "error", message: inner instanceof Error ? inner.message : "无法连接服务器" };
@@ -33,7 +40,11 @@
     }
   }
 
-  onMount(boot);
+  onMount(() => {
+    // A stored choice applies before the first paint; the server default refines it.
+    initTheme("paper");
+    void boot();
+  });
 </script>
 
 {#if view.kind === "login"}
@@ -61,9 +72,8 @@
   }
   .center button {
     padding: 8px 16px;
-    border-radius: 10px;
-    border: 1px solid var(--line-strong);
-    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--btn-radius);
     color: var(--ink);
   }
 </style>

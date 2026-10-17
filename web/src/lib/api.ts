@@ -1,5 +1,5 @@
 export type AuthMethods = { password: boolean; username: boolean; passkey: boolean };
-export type SystemInfo = { version: string; title: string; auth: AuthMethods };
+export type SystemInfo = { version: string; title: string; theme: string; auth: AuthMethods };
 
 export type Slot<T> = { data: T | null; error: string | null; updatedAt: number | null; checkedAt: number | null };
 
@@ -117,7 +117,7 @@ export type Widgets = {
 };
 
 export type Dashboard = {
-  profile: { name: string; tagline: string; title?: string | null };
+  profile: { name: string; tagline: string; title?: string | null; theme?: string | null };
   services: Service[];
   links: Partial<Record<"vikunja" | "forgejo" | "github" | "bookmarkd" | "homeassistant" | "inbox", string>>;
   widgets: Widgets;

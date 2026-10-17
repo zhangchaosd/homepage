@@ -34,22 +34,22 @@
   <div class="profile">
     <a class="who" href={data.user.url} target="_blank" rel="noopener noreferrer">
       {#if data.user.avatar}
-        <img class="avatar" src={data.user.avatar} alt="" width="52" height="52" />
+        <img class="avatar" src={data.user.avatar} alt="" width="56" height="56" />
       {:else}
         <span class="avatar fallback"><Icon name="github" size={22} /></span>
       {/if}
       <span class="names">
         <span class="name">{data.user.name ?? data.user.login}</span>
-        <span class="login">@{data.user.login}</span>
+        <span class="login mono">@{data.user.login}</span>
       </span>
     </a>
     {#if data.user.bio}<p class="bio">{data.user.bio}</p>{/if}
     <dl class="stats">
-      <div><dt>仓库</dt><dd class="tnum">{compact.format(data.user.publicRepos)}</dd></div>
-      <div><dt>关注者</dt><dd class="tnum">{compact.format(data.user.followers)}</dd></div>
-      <div><dt>关注</dt><dd class="tnum">{compact.format(data.user.following)}</dd></div>
+      <div><dd class="figure tnum">{compact.format(data.user.publicRepos)}</dd><dt class="label">仓库</dt></div>
+      <div><dd class="figure tnum">{compact.format(data.user.followers)}</dd><dt class="label">关注者</dt></div>
+      <div><dd class="figure tnum">{compact.format(data.user.following)}</dd><dt class="label">关注</dt></div>
       {#if data.contributions}
-        <div><dt>今年贡献</dt><dd class="tnum">{compact.format(data.contributions.total)}</dd></div>
+        <div><dd class="figure tnum">{compact.format(data.contributions.total)}</dd><dt class="label">今年贡献</dt></div>
       {/if}
     </dl>
   </div>
@@ -57,15 +57,13 @@
   <ul class="repos">
     {#each data.repos as repo (repo.name)}
       <li>
-        <a class="repo pressable" href={repo.url} target="_blank" rel="noopener noreferrer">
+        <a class="repo" href={repo.url} target="_blank" rel="noopener noreferrer">
           <span class="repo-name">{repo.name}</span>
           <span class="desc">{repo.description ?? "暂无描述"}</span>
           <span class="meta">
-            {#if repo.language}
-              <span class="lang"><i style:background={languageColors[repo.language] ?? "var(--faint)"}></i>{repo.language}</span>
-            {/if}
-            {#if repo.stars > 0}<span class="num tnum"><Icon name="star" size={12} />{compact.format(repo.stars)}</span>{/if}
-            {#if repo.forks > 0}<span class="num tnum"><Icon name="fork" size={12} />{compact.format(repo.forks)}</span>{/if}
+            {#if repo.language}<span class="lang"><i style:background={languageColors[repo.language] ?? "var(--faint)"}></i>{repo.language}</span>{/if}
+            {#if repo.stars > 0}<span class="num tnum"><Icon name="star" size={11} />{compact.format(repo.stars)}</span>{/if}
+            {#if repo.forks > 0}<span class="num tnum"><Icon name="fork" size={11} />{compact.format(repo.forks)}</span>{/if}
             <span class="pushed">{ago(repo.pushedAt, now.value)}</span>
           </span>
         </a>
@@ -83,27 +81,30 @@
 <style>
   .layout {
     display: grid;
-    grid-template-columns: minmax(220px, 280px) 1fr;
-    gap: 24px;
+    grid-template-columns: minmax(220px, 300px) 1fr;
+    gap: 40px;
   }
   @media (max-width: 760px) {
     .layout {
       grid-template-columns: 1fr;
-      gap: 16px;
+      gap: 20px;
     }
   }
-
   .who {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
   }
   .avatar {
-    width: 52px;
-    height: 52px;
+    width: 56px;
+    height: 56px;
     border-radius: 50%;
-    border: 1px solid var(--line);
+    border: 1px solid var(--hair);
     object-fit: cover;
+  }
+  :global(:root[data-theme="panel"]) .avatar,
+  :global(:root[data-theme="swiss"]) .avatar {
+    border-radius: var(--tile-radius);
   }
   .avatar.fallback {
     display: grid;
@@ -112,14 +113,23 @@
   }
   .names {
     display: grid;
+    gap: 3px;
   }
   .name {
-    font-size: 16px;
+    font-family: var(--font-heading);
+    font-weight: var(--w-heading);
+    font-size: 22px;
+    letter-spacing: var(--ls-heading);
+    line-height: 1.1;
+  }
+  :global(:root[data-theme="panel"]) .name {
+    font-family: var(--font-sans);
     font-weight: 600;
+    font-size: 16px;
     letter-spacing: -0.01em;
   }
   .login {
-    font-size: 13px;
+    font-size: 12px;
     color: var(--muted);
   }
   .bio {
@@ -129,24 +139,54 @@
     line-height: 1.55;
   }
 
+  /* Figures in a ruled strip. */
   .stats {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px 16px;
-    margin: 16px 0 0;
+    grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+    margin: 18px 0 0;
+    border-top: 1px solid var(--hair);
+  }
+  :global(:root[data-theme="panel"]) .stats,
+  :global(:root[data-theme="swiss"]) .stats {
+    gap: var(--tile-gap);
+    background: var(--tile-grid-bg);
+    border: 1px solid var(--tile-border);
+  }
+  :global(:root[data-theme="panel"]) .stats {
+    border: 0;
+    background: transparent;
+  }
+  :global(:root[data-theme="swiss"]) .stats {
+    border-width: 1.5px;
   }
   .stats div {
     display: grid;
+    gap: 6px;
+    padding: 12px 12px 10px 0;
+    border-right: 1px solid var(--hair);
   }
-  dt {
-    font-size: 11.5px;
-    color: var(--muted);
+  .stats div:last-child {
+    border-right: 0;
+  }
+  .stats div + div {
+    padding-left: 12px;
+  }
+  :global(:root[data-theme="panel"]) .stats div,
+  :global(:root[data-theme="swiss"]) .stats div {
+    padding: 10px 12px;
+    border-right: 0;
+    background: var(--tile-bg);
+  }
+  :global(:root[data-theme="panel"]) .stats div {
+    border: 1px solid var(--tile-border);
+    border-radius: var(--tile-radius);
   }
   dd {
     margin: 0;
-    font-size: 18px;
-    font-weight: 600;
-    letter-spacing: -0.02em;
+    font-size: 28px;
+  }
+  :global(:root[data-theme="panel"]) dd {
+    font-size: 24px;
   }
 
   .repos {
@@ -154,23 +194,35 @@
     margin: 0;
     padding: 0;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-    gap: 8px;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--tile-gap);
     align-content: start;
+    background: var(--tile-grid-bg);
+    border: 1px solid var(--tile-border);
+  }
+  :global(:root[data-theme="panel"]) .repos {
+    border: 0;
+    background: transparent;
+  }
+  :global(:root[data-theme="swiss"]) .repos {
+    border-width: 1.5px;
   }
   .repo {
     display: grid;
     gap: 4px;
     height: 100%;
-    padding: 11px 13px;
-    border-radius: var(--radius-tile);
-    border: 1px solid var(--line);
-    background: var(--surface-2);
+    min-height: 104px;
+    padding: 13px 15px;
+    background: var(--tile-bg);
+    border-radius: var(--tile-radius);
+    transition: background-color 160ms ease;
+  }
+  :global(:root[data-theme="panel"]) .repo {
+    border: 1px solid var(--tile-border);
   }
   @media (hover: hover) and (pointer: fine) {
     .repo:hover {
       background: var(--surface-hover);
-      border-color: var(--line-strong);
     }
   }
   .repo-name {
@@ -195,9 +247,15 @@
     flex-wrap: wrap;
     align-items: center;
     gap: 4px 12px;
-    margin-top: 2px;
-    font-size: 12px;
+    margin-top: auto;
+    padding-top: 6px;
+    font-size: 11.5px;
     color: var(--muted);
+  }
+  :global(:root[data-theme="panel"]) .meta,
+  :global(:root[data-theme="swiss"]) .meta {
+    font-family: var(--font-mono);
+    font-size: 11px;
   }
   .lang,
   .num {
@@ -206,17 +264,16 @@
     gap: 5px;
   }
   .lang i {
-    width: 8px;
-    height: 8px;
+    width: 7px;
+    height: 7px;
     border-radius: 50%;
   }
   .pushed {
     margin-left: auto;
   }
-
   .calendar {
-    margin-top: 18px;
+    margin-top: 20px;
     padding-top: 16px;
-    border-top: 1px solid var(--line);
+    border-top: 1px solid var(--hair-soft);
   }
 </style>

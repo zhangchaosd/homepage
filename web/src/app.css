@@ -1,87 +1,247 @@
+@import "@fontsource/instrument-serif/400.css";
+@import "@fontsource/instrument-serif/400-italic.css";
 @import "@fontsource-variable/geist";
 @import "@fontsource-variable/geist-mono";
 
-/* ------------------------------------------------------------------ tokens */
+/* =====================================================================
+   Three looks on one structure. Components only use the semantic tokens
+   below; each theme sets them once, and light-dark() picks the palette
+   from the root's color-scheme (set by lib/theme.svelte.ts).
+   ===================================================================== */
 
 :root {
-  --font-sans: "Geist Variable", -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB",
-    "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+  --font-sans: "Geist Variable", -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+    "Noto Sans CJK SC", sans-serif;
   --font-mono: "Geist Mono Variable", ui-monospace, "SF Mono", Menlo, monospace;
-
-  /* Warm paper neutrals */
-  --bg: #f5f4f0;
-  --bg-glow: rgba(255, 255, 255, 0.9);
-  --surface: #ffffff;
-  --surface-2: #fafaf8;
-  --surface-hover: #f4f3ef;
-  --ink: #1c1c1a;
-  --ink-2: #4a4945;
-  --muted: #8a8880;
-  --faint: #b9b7ae;
-  --line: rgba(28, 28, 26, 0.075);
-  --line-strong: rgba(28, 28, 26, 0.13);
-
-  --accent: #2f7f68;
-  --accent-ink: #1f5a49;
-  --accent-soft: rgba(47, 127, 104, 0.1);
-  --warn: #b7791f;
-  --warn-soft: rgba(183, 121, 31, 0.11);
-  --danger: #c2492f;
-  --danger-soft: rgba(194, 73, 47, 0.1);
-
-  --heat-0: rgba(28, 28, 26, 0.055);
-  --heat-1: #c4e3d6;
-  --heat-2: #86c3aa;
-  --heat-3: #3f9b7f;
-  --heat-4: #1f6b55;
-
-  --shadow-card: 0 1px 0 rgba(28, 28, 26, 0.03), 0 1px 2px rgba(28, 28, 26, 0.04),
-    0 8px 24px -12px rgba(28, 28, 26, 0.08);
-  --shadow-pop: 0 1px 2px rgba(28, 28, 26, 0.06), 0 12px 32px -8px rgba(28, 28, 26, 0.16);
-
-  --radius-card: 20px;
-  --radius-tile: 14px;
-  --radius-sm: 9px;
+  --font-serif: "Instrument Serif", "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", "SimSun", Georgia,
+    serif;
 
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
-
-  color-scheme: light;
+  --gutter: clamp(16px, 4vw, 56px);
+  color-scheme: light dark;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0e0e0d;
-    --bg-glow: rgba(255, 255, 255, 0.035);
-    --surface: #161615;
-    --surface-2: #1b1b19;
-    --surface-hover: #20201e;
-    --ink: #ecebe6;
-    --ink-2: #bdbbb3;
-    --muted: #85837b;
-    --faint: #57564f;
-    --line: rgba(255, 255, 255, 0.065);
-    --line-strong: rgba(255, 255, 255, 0.11);
+/* ------------------------------------------------------------ 晨报 paper */
+:root[data-theme="paper"],
+:root:not([data-theme]) {
+  --bg: light-dark(#f3f1ea, #0f0f0d);
+  --bg-2: light-dark(#ebe8df, #161614);
+  --surface: light-dark(#f3f1ea, #0f0f0d);
+  --surface-2: light-dark(#ebe8df, #171715);
+  --surface-hover: light-dark(#e6e2d6, #1f1f1c);
+  --ink: light-dark(#16150f, #ece9df);
+  --ink-2: light-dark(#4b4a42, #b9b6aa);
+  --muted: light-dark(#8a877b, #807d72);
+  --faint: light-dark(#bdb9ab, #4f4d46);
+  --line: light-dark(#16150f, #ece9df);
+  --hair: light-dark(rgba(22, 21, 15, 0.16), rgba(236, 233, 223, 0.16));
+  --hair-soft: light-dark(rgba(22, 21, 15, 0.08), rgba(236, 233, 223, 0.08));
+  --accent: light-dark(#c8411e, #ff6a3d);
+  --accent-ink: light-dark(#a3331a, #ff8c66);
+  --accent-soft: light-dark(rgba(200, 65, 30, 0.1), rgba(255, 106, 61, 0.14));
+  --on-accent: light-dark(#fff, #1a0d08);
+  --ok: light-dark(#2f7f68, #5cc4a1);
+  --ok-soft: light-dark(rgba(47, 127, 104, 0.12), rgba(92, 196, 161, 0.14));
+  --warn: light-dark(#a8701a, #e0a84a);
+  --warn-soft: light-dark(rgba(168, 112, 26, 0.12), rgba(224, 168, 74, 0.14));
+  --danger: light-dark(#c8411e, #ff6a3d);
+  --danger-soft: light-dark(rgba(200, 65, 30, 0.1), rgba(255, 106, 61, 0.14));
+  --heat-0: light-dark(rgba(22, 21, 15, 0.06), rgba(236, 233, 223, 0.06));
+  --heat-1: light-dark(#e8c9bd, #4a241a);
+  --heat-2: light-dark(#e09a80, #7a3421);
+  --heat-3: light-dark(#d4683f, #b84a28);
+  --heat-4: light-dark(#a3331a, #ff8c66);
 
-    --accent: #5cc4a1;
-    --accent-ink: #8fdcc0;
-    --accent-soft: rgba(92, 196, 161, 0.12);
-    --warn: #e0a84a;
-    --warn-soft: rgba(224, 168, 74, 0.13);
-    --danger: #ef7c62;
-    --danger-soft: rgba(239, 124, 98, 0.13);
+  --font-display: var(--font-serif);
+  --font-heading: var(--font-serif);
+  --font-number: var(--font-serif);
+  --w-display: 400;
+  --w-heading: 400;
+  --w-number: 400;
+  --ls-display: -0.02em;
+  --ls-heading: -0.015em;
+  --ls-number: -0.03em;
+  --size-heading: 30px;
+  --size-display: clamp(60px, 8vw, 108px);
+  --lh-display: 0.92;
+  --transform-label: uppercase;
+  --ls-label: 0.14em;
 
-    --heat-0: rgba(255, 255, 255, 0.05);
-    --heat-1: #173f33;
-    --heat-2: #22654f;
-    --heat-3: #33977a;
-    --heat-4: #67d1ad;
+  --card-bg: transparent;
+  --card-border: transparent;
+  --card-border-w: 0px;
+  --card-radius: 0px;
+  --card-shadow: none;
+  --card-pad-x: 0px;
+  --card-pad-y: 0px;
+  --section-rule: var(--line);
+  --section-rule-sub: var(--hair);
+  --col-rule: var(--hair);
+  --head-rule: transparent;
+  --tile-bg: var(--surface);
+  --tile-border: var(--hair);
+  --tile-radius: 0px;
+  --tile-gap: 1px;
+  --tile-grid-bg: var(--hair);
+  --input-bg: transparent;
+  --input-border: var(--hair);
+  --input-radius: 0px;
+  --btn-bg: var(--ink);
+  --btn-fg: var(--bg);
+  --btn-radius: 0px;
+  --chip-radius: 999px;
+}
 
-    --shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.015), 0 8px 24px -12px rgba(0, 0, 0, 0.6);
-    --shadow-pop: 0 0 0 1px rgba(255, 255, 255, 0.04), 0 16px 40px -8px rgba(0, 0, 0, 0.7);
+/* ------------------------------------------------------------ 控制台 panel */
+:root[data-theme="panel"] {
+  --bg: light-dark(#e9eae7, #0a0b0b);
+  --bg-2: light-dark(#dfe1dd, #0e1010);
+  --surface: light-dark(#f6f6f4, #111313);
+  --surface-2: light-dark(#ededea, #161919);
+  --surface-hover: light-dark(#e4e5e1, #1c1f1f);
+  --ink: light-dark(#141615, #e6e8e3);
+  --ink-2: light-dark(#454846, #a9ada6);
+  --muted: light-dark(#767a77, #6c716d);
+  --faint: light-dark(#b4b8b5, #3b403e);
+  --line: light-dark(#b9bdba, #2a302f);
+  --hair: light-dark(#cfd2cf, #1e2322);
+  --hair-soft: light-dark(#dcdfdc, #181c1b);
+  --accent: light-dark(#b8780f, #f5a524);
+  --accent-ink: light-dark(#8f5c08, #ffc15a);
+  --accent-soft: light-dark(rgba(184, 120, 15, 0.14), rgba(245, 165, 36, 0.14));
+  --on-accent: #1a1200;
+  --ok: light-dark(#1f8a4a, #53d769);
+  --ok-soft: light-dark(rgba(31, 138, 74, 0.14), rgba(83, 215, 105, 0.14));
+  --warn: light-dark(#b8780f, #f5a524);
+  --warn-soft: var(--accent-soft);
+  --danger: light-dark(#c9372c, #e5484d);
+  --danger-soft: light-dark(rgba(201, 55, 44, 0.12), rgba(229, 72, 77, 0.16));
+  --data: light-dark(#0e7490, #5fd3f0);
+  --heat-0: light-dark(#d9dcd8, #1e2322);
+  --heat-1: light-dark(#ead9ad, #3a3416);
+  --heat-2: light-dark(#dfbc62, #6a4d12);
+  --heat-3: light-dark(#cd9a2a, #b07d18);
+  --heat-4: light-dark(#9a6410, #f5a524);
 
-    color-scheme: dark;
-  }
+  --font-display: var(--font-sans);
+  --font-heading: var(--font-mono);
+  --font-number: var(--font-mono);
+  --w-display: 600;
+  --w-heading: 500;
+  --w-number: 300;
+  --ls-display: -0.035em;
+  --ls-heading: 0.14em;
+  --ls-number: -0.04em;
+  --size-heading: 11px;
+  --size-display: clamp(40px, 5vw, 64px);
+  --lh-display: 1;
+  --transform-label: uppercase;
+  --ls-label: 0.14em;
+
+  --card-bg: var(--surface);
+  --card-border: var(--line);
+  --card-border-w: 1px;
+  --card-radius: 10px;
+  --card-shadow: inset 0 1px 0 light-dark(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.04)),
+    0 10px 30px -20px light-dark(rgba(0, 0, 0, 0.2), #000);
+  --card-pad-x: 14px;
+  --card-pad-y: 12px;
+  --section-rule: transparent;
+  --section-rule-sub: transparent;
+  --col-rule: transparent;
+  --head-rule: var(--hair);
+  --tile-bg: var(--surface-2);
+  --tile-border: var(--hair);
+  --tile-radius: 8px;
+  --tile-gap: 8px;
+  --tile-grid-bg: transparent;
+  --input-bg: var(--bg);
+  --input-border: var(--line);
+  --input-radius: 6px;
+  --btn-bg: var(--accent);
+  --btn-fg: var(--on-accent);
+  --btn-radius: 5px;
+  --chip-radius: 4px;
+}
+
+/* ------------------------------------------------------------ 工作台 swiss */
+:root[data-theme="swiss"] {
+  --bg: light-dark(#f6f6f3, #121211);
+  --bg-2: light-dark(#ebebe6, #1a1a18);
+  --surface: light-dark(#ffffff, #1b1b19);
+  --surface-2: light-dark(#f1f1ed, #222220);
+  --surface-hover: light-dark(#e9e9e4, #2a2a27);
+  --ink: light-dark(#0d0d0c, #f2f2ee);
+  --ink-2: light-dark(#444441, #c3c3bc);
+  --muted: light-dark(#7d7d77, #8d8d86);
+  --faint: light-dark(#c4c4be, #4a4a46);
+  --line: light-dark(#0d0d0c, #f2f2ee);
+  --hair: light-dark(rgba(13, 13, 12, 0.2), rgba(242, 242, 238, 0.22));
+  --hair-soft: light-dark(rgba(13, 13, 12, 0.1), rgba(242, 242, 238, 0.1));
+  --accent: light-dark(#1f3fd6, #6f87ff);
+  --accent-ink: light-dark(#1631ad, #93a5ff);
+  --accent-soft: light-dark(rgba(31, 63, 214, 0.1), rgba(111, 135, 255, 0.16));
+  --on-accent: light-dark(#fff, #0b1030);
+  --ok: light-dark(#1f8a5b, #4fcf8e);
+  --ok-soft: light-dark(rgba(31, 138, 91, 0.12), rgba(79, 207, 142, 0.14));
+  --warn: light-dark(#b2620c, #f0a24a);
+  --warn-soft: light-dark(rgba(178, 98, 12, 0.12), rgba(240, 162, 74, 0.14));
+  --danger: light-dark(#d7361e, #ff6a52);
+  --danger-soft: light-dark(rgba(215, 54, 30, 0.1), rgba(255, 106, 82, 0.14));
+  --heat-0: light-dark(rgba(13, 13, 12, 0.08), rgba(242, 242, 238, 0.08));
+  --heat-1: light-dark(#c9d3f3, #26305e);
+  --heat-2: light-dark(#93a6e8, #3a4ea8);
+  --heat-3: light-dark(#5c79de, #5a74e6);
+  --heat-4: light-dark(#1f3fd6, #93a5ff);
+  /* Tinted fields, one per section, in document order. */
+  --field-1: light-dark(#e4e8f3, #1b2030);
+  --field-2: light-dark(#fbe8d3, #2e2419);
+  --field-3: light-dark(#dfeee6, #182820);
+  --field-4: light-dark(#f1e3ee, #2a1f28);
+  --field-5: light-dark(#ebebe6, #202020);
+  --field-6: light-dark(#fdf0c7, #2d2816);
+  --field-7: light-dark(#e3eef4, #182429);
+  --field-8: light-dark(#ffffff, #1b1b19);
+
+  --font-display: var(--font-sans);
+  --font-heading: var(--font-sans);
+  --font-number: var(--font-sans);
+  --w-display: 700;
+  --w-heading: 700;
+  --w-number: 700;
+  --ls-display: -0.05em;
+  --ls-heading: -0.02em;
+  --ls-number: -0.06em;
+  --size-heading: 15px;
+  --size-display: clamp(56px, 7.5vw, 104px);
+  --lh-display: 0.9;
+  --transform-label: uppercase;
+  --ls-label: 0.08em;
+
+  --card-bg: var(--surface);
+  --card-border: var(--line);
+  --card-border-w: 1.5px;
+  --card-radius: 0px;
+  --card-shadow: none;
+  --card-pad-x: 16px;
+  --card-pad-y: 12px;
+  --section-rule: transparent;
+  --section-rule-sub: transparent;
+  --col-rule: transparent;
+  --head-rule: var(--line);
+  --tile-bg: var(--surface);
+  --tile-border: var(--line);
+  --tile-radius: 0px;
+  --tile-gap: 1.5px;
+  --tile-grid-bg: var(--line);
+  --input-bg: var(--surface);
+  --input-border: var(--line);
+  --input-radius: 0px;
+  --btn-bg: var(--accent);
+  --btn-fg: var(--on-accent);
+  --btn-radius: 0px;
+  --chip-radius: 0px;
 }
 
 /* ------------------------------------------------------------------- base */
@@ -97,13 +257,20 @@ html {
   text-size-adjust: 100%;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
 body {
+  position: relative;
   margin: 0;
   min-height: 100dvh;
-  background:
-    radial-gradient(1200px 520px at 12% -10%, var(--bg-glow), transparent 70%),
-    var(--bg);
-  background-attachment: fixed;
+  background: var(--bg);
   color: var(--ink);
   font-family: var(--font-sans);
   font-size: 14px;
@@ -112,6 +279,28 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-tap-highlight-color: transparent;
+  transition: background-color 240ms ease, color 240ms ease;
+}
+
+/* Paper grain: a touch of tooth so flat areas do not read as a screen. */
+:root[data-theme="paper"] body::before,
+:root:not([data-theme]) body::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: light-dark(0.5, 0.3);
+  mix-blend-mode: light-dark(multiply, screen);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.07 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Panel: an engineering grid behind the modules. */
+:root[data-theme="panel"] body {
+  background-image: linear-gradient(var(--hair-soft) 1px, transparent 1px),
+    linear-gradient(90deg, var(--hair-soft) 1px, transparent 1px);
+  background-size: 48px 48px;
+  background-position: -1px -1px;
 }
 
 a {
@@ -120,7 +309,9 @@ a {
 }
 
 button,
-input {
+input,
+textarea,
+select {
   font: inherit;
   color: inherit;
 }
@@ -136,18 +327,47 @@ button {
 
 :focus-visible {
   outline: 2px solid var(--accent);
-  outline-offset: 2px;
-  border-radius: 6px;
+  outline-offset: 3px;
+  border-radius: 2px;
 }
 
 ::selection {
-  background: var(--accent-soft);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+/* --------------------------------------------------------------- utilities */
+
+.display {
+  font-family: var(--font-display);
+  font-weight: var(--w-display);
+  letter-spacing: var(--ls-display);
+}
+
+/* Big figures: the same number in each theme's own voice. */
+.figure {
+  font-family: var(--font-number);
+  font-weight: var(--w-number);
+  letter-spacing: var(--ls-number);
+  font-variant-numeric: tabular-nums;
+  line-height: 0.9;
 }
 
 .mono {
   font-family: var(--font-mono);
   font-feature-settings: "zero" 1;
   letter-spacing: -0.01em;
+}
+
+/* Small caps label: section numbers, group names, metadata keys. */
+.label {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: var(--ls-label);
+  text-transform: var(--transform-label);
+  color: var(--muted);
+  line-height: 1;
 }
 
 .tnum {
@@ -163,15 +383,56 @@ button {
   white-space: nowrap;
 }
 
-/* Pressable feedback, shared by every clickable surface. */
 .pressable {
   transition:
     transform 160ms var(--ease-out),
     background-color 160ms ease,
-    border-color 160ms ease;
+    border-color 160ms ease,
+    color 160ms ease;
 }
 .pressable:active {
   transform: scale(0.97);
+}
+
+/* Text links draw an underline in from the left. */
+.link {
+  position: relative;
+}
+.link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 240ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .link:hover::after {
+    transform: scaleX(1);
+  }
+}
+
+/* Status dot shared by services and the hero index. */
+.dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ok);
+  flex: none;
+}
+.dot.down {
+  background: var(--danger);
+}
+:root[data-theme="panel"] .dot {
+  box-shadow: 0 0 8px var(--ok);
+}
+:root[data-theme="panel"] .dot.down {
+  box-shadow: 0 0 8px var(--danger);
 }
 
 @media (prefers-reduced-motion: reduce) {

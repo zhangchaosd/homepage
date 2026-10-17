@@ -22,6 +22,9 @@ username = "chao"
 name = "Chao"
 tagline = "所有自托管服务的统一入口。"
 title = "Chao · Home"
+# Default look: "paper" (晨报), "panel" (控制台) or "swiss" (工作台).
+# Each browser can pick its own in 设置 → 外观; that choice wins over this.
+theme = "paper"
 
 # ----------------------------------------------------------------- services
 # url   — what the tile opens (public address)

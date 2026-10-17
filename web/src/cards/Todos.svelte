@@ -17,8 +17,7 @@
     const due: Task[] = [];
     const upcoming: Task[] = [];
     for (const task of data.tasks) {
-      if (done[task.id]) continue;
-      if (!task.due) continue;
+      if (done[task.id] || !task.due) continue;
       const diff = dayDiff(new Date(task.due), today);
       const past = new Date(task.due).getTime() < today.getTime();
       if (diff < 0 || (diff === 0 && past && hasTime(task.due))) overdue.push(task);
@@ -58,42 +57,37 @@
   }
 </script>
 
-<div class="summary">
-  <span class="count tnum">{todayCount}</span>
+<p class="summary">
+  <span class="figure n tnum">{todayCount}</span>
   <span class="caption">{todayCount === 0 ? "今天没有待办，享受一下" : "项待办需要今天处理"}</span>
-</div>
+</p>
 
 {#if groups.length === 0}
-  <div class="clear">
-    <Icon name="check" size={18} stroke={2.2} />
-    <span>全部完成</span>
-  </div>
+  <div class="clear"><Icon name="check" size={16} stroke={2.2} /><span>全部完成</span></div>
 {:else}
   <div class="groups">
     {#each groups as group (group.key)}
       <div class="group">
-        <h3 class:overdue={group.key === "overdue"}>{group.label}<span class="n tnum">{group.tasks.length}</span></h3>
+        <h3 class="label" class:overdue={group.key === "overdue"}>{group.label}<span class="count tnum">{group.tasks.length}</span></h3>
         <ul>
           {#each group.tasks as task (task.id)}
             <li class:checked={pending[task.id]}>
               <button
                 class="check pressable"
-                class:urgent={task.priority >= 4}
+                class:urgent={task.priority >= 4 || group.key === "overdue"}
                 onclick={() => complete(task)}
                 aria-label="完成 {task.title}"
                 disabled={pending[task.id]}
               >
-                <Icon name="check" size={11} stroke={3} />
+                <Icon name="check" size={10} stroke={3} />
               </button>
               <a class="task" href={task.url} target="_blank" rel="noopener noreferrer">
                 <span class="title">{task.title}</span>
                 <span class="meta">
-                  {#if task.due}
-                    <span class="due tnum" class:late={group.key === "overdue"}>{dueLabel(task.due, new Date(now.value))}</span>
-                  {/if}
-                  {#if task.project}<span class="project">{task.project}</span>{/if}
+                  {#if task.due}<span class="due tnum" class:late={group.key === "overdue"}>{dueLabel(task.due, new Date(now.value))}</span>{/if}
+                  {#if task.project}<span>{task.project}</span>{/if}
                   {#each task.labels.slice(0, 2) as label (label.title)}
-                    <span class="label" style:--label={label.hex_color ? `#${label.hex_color.replace("#", "")}` : null}>{label.title}</span>
+                    <span class="tag" style:--label={label.hex_color ? `#${label.hex_color.replace("#", "")}` : null}>{label.title}</span>
                   {/each}
                 </span>
               </a>
@@ -111,40 +105,41 @@
   .summary {
     display: flex;
     align-items: baseline;
-    gap: 10px;
-    margin: 2px 0 14px;
+    gap: 12px;
+    margin: 0 0 16px;
   }
-  .count {
-    font-size: 34px;
-    font-weight: 600;
-    letter-spacing: -0.04em;
-    line-height: 1;
+  .n {
+    font-size: 64px;
+  }
+  :global(:root[data-theme="panel"]) .n {
+    font-size: 54px;
+    color: var(--accent);
   }
   .caption {
     color: var(--muted);
     font-size: 13px;
+  }
+  :global(:root[data-theme="panel"]) .caption {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
   .groups {
     display: grid;
     gap: 14px;
   }
-
   h3 {
     display: flex;
-    align-items: center;
-    gap: 6px;
-    margin: 0 0 4px;
-    font-size: 11.5px;
-    font-weight: 550;
-    letter-spacing: 0.04em;
-    color: var(--muted);
+    align-items: baseline;
+    gap: 8px;
+    margin: 0 0 2px;
   }
   h3.overdue {
     color: var(--danger);
   }
-  .n {
-    font-weight: 500;
+  .count {
     opacity: 0.7;
   }
 
@@ -153,31 +148,31 @@
     margin: 0;
     padding: 0;
   }
-
   li {
     display: flex;
     align-items: flex-start;
-    gap: 11px;
-    padding: 7px 0;
-    border-top: 1px solid var(--line);
+    gap: 12px;
+    padding: 9px 0;
+    border-top: 1px solid var(--hair-soft);
     transition: opacity 300ms ease;
   }
   li:first-child {
     border-top: 0;
   }
   li.checked {
-    opacity: 0.45;
+    opacity: 0.4;
   }
 
+  /* Paper: a ring. Panel/swiss: a box. */
   .check {
     flex: none;
     display: grid;
     place-items: center;
-    width: 18px;
-    height: 18px;
-    margin-top: 1px;
-    border-radius: 6px;
-    border: 1.5px solid var(--faint);
+    width: 16px;
+    height: 16px;
+    margin-top: 3px;
+    border: 1px solid var(--faint);
+    border-radius: 50%;
     color: transparent;
     transition:
       transform 160ms var(--ease-out),
@@ -185,19 +180,26 @@
       border-color 180ms ease,
       color 180ms ease;
   }
+  :global(:root[data-theme="panel"]) .check {
+    border-radius: 3px;
+  }
+  :global(:root[data-theme="swiss"]) .check {
+    border-radius: 0;
+    border: 1.5px solid var(--ink);
+  }
   .check.urgent {
     border-color: var(--danger);
   }
   @media (hover: hover) and (pointer: fine) {
     .check:hover {
-      border-color: var(--accent);
-      color: var(--accent);
+      border-color: var(--ink);
+      color: var(--ink);
     }
   }
   li.checked .check {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: var(--surface);
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--bg);
   }
 
   .task {
@@ -207,10 +209,10 @@
     flex: 1;
   }
   .title {
-    font-size: 13.5px;
+    font-size: 14px;
     line-height: 1.4;
     overflow-wrap: anywhere;
-    transition: color 200ms ease;
+    transition: color 160ms ease;
   }
   li.checked .title {
     text-decoration: line-through;
@@ -221,25 +223,28 @@
       color: var(--accent-ink);
     }
   }
-
   .meta {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 4px 8px;
+    gap: 2px 10px;
     font-size: 12px;
     color: var(--muted);
+  }
+  :global(:root[data-theme="panel"]) .meta {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
   }
   .due.late {
     color: var(--danger);
   }
-  .label {
+  .tag {
     --label: var(--muted);
     display: inline-flex;
     align-items: center;
     gap: 5px;
   }
-  .label::before {
+  .tag::before {
     content: "";
     width: 6px;
     height: 6px;
@@ -248,16 +253,13 @@
   }
 
   .clear {
-    flex: 1;
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: 8px;
-    min-height: 100px;
-    color: var(--accent);
+    padding: 20px 0;
+    color: var(--ok);
     font-weight: 550;
   }
-
   .error {
     margin: 10px 0 0;
     color: var(--danger);

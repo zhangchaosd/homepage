@@ -19,14 +19,7 @@
     wind_speed: "wind",
     illuminance: "bulb",
   };
-  const byDomain: Record<string, string> = {
-    light: "bulb",
-    switch: "power",
-    fan: "wind",
-    climate: "thermometer",
-    lock: "key",
-    person: "eye",
-  };
+  const byDomain: Record<string, string> = { light: "bulb", switch: "power", fan: "wind", climate: "thermometer", lock: "key", person: "eye", cover: "door" };
 
   const words: Record<string, string> = {
     on: "开",
@@ -35,6 +28,8 @@
     not_home: "外出",
     open: "开",
     closed: "关",
+    opening: "开启中",
+    closing: "关闭中",
     locked: "已锁",
     unlocked: "未锁",
     unavailable: "不可用",
@@ -67,10 +62,10 @@
   <ul class="grid">
     {#each entities as entity (entity.id)}
       {@const shown = display(entity)}
-      <li class="tile" class:active={shown.active && !entity.error} class:failed={!!entity.error} title={entity.error ?? entity.id}>
-        <span class="icon"><Icon name={iconFor(entity)} size={16} /></span>
-        <span class="value tnum">
-          {#if entity.error}—{:else}{shown.value}{#if shown.unit}<span class="unit">{shown.unit}</span>{/if}{/if}
+      <li class="cell" class:active={shown.active && !entity.error} class:failed={!!entity.error} title={entity.error ?? entity.id}>
+        <span class="icon"><Icon name={iconFor(entity)} size={14} /></span>
+        <span class="value figure tnum">
+          {#if entity.error}—{:else}{shown.value}{#if shown.unit}<small>{shown.unit}</small>{/if}{/if}
         </span>
         <span class="name">{entity.name}</span>
       </li>
@@ -79,56 +74,66 @@
 {/if}
 
 <style>
+  /* Instruments in a ruled grid, two across. */
   .grid {
     list-style: none;
     margin: 0;
     padding: 0;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(124px, 1fr));
-    gap: 8px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--tile-gap);
+    background: var(--tile-grid-bg);
+    border: 1px solid var(--tile-border);
   }
-  .tile {
+  :global(:root[data-theme="panel"]) .grid {
+    border: 0;
+    background: transparent;
+  }
+  :global(:root[data-theme="swiss"]) .grid {
+    border-width: 1.5px;
+  }
+  .cell {
+    position: relative;
     display: grid;
-    gap: 2px;
-    padding: 12px 13px 11px;
-    border-radius: var(--radius-tile);
-    border: 1px solid var(--line);
-    background: var(--surface-2);
+    gap: 4px;
+    padding: 14px 14px 12px;
     min-width: 0;
+    background: var(--tile-bg);
+    border-radius: var(--tile-radius);
+  }
+  :global(:root[data-theme="panel"]) .cell {
+    border: 1px solid var(--tile-border);
   }
   .icon {
-    display: grid;
-    place-items: center;
-    width: 28px;
-    height: 28px;
-    margin-bottom: 8px;
-    border-radius: 9px;
-    background: var(--surface);
-    border: 1px solid var(--line);
-    color: var(--muted);
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    color: var(--faint);
   }
-  .tile.active .icon {
-    background: var(--accent-soft);
-    border-color: transparent;
-    color: var(--accent-ink);
+  .cell.active .icon {
+    color: var(--ok);
   }
-  .tile.failed .icon {
+  .cell.failed .icon {
     color: var(--danger);
   }
   .value {
-    font-size: 22px;
-    font-weight: 600;
-    letter-spacing: -0.03em;
-    line-height: 1.15;
+    font-size: 32px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    padding-top: 6px;
   }
-  .unit {
-    margin-left: 2px;
-    font-size: 13px;
-    font-weight: 500;
+  :global(:root[data-theme="panel"]) .value {
+    font-size: 28px;
+  }
+  :global(:root[data-theme="panel"]) .cell.active .value {
+    color: var(--ok);
+  }
+  .value small {
+    font-size: 0.45em;
     color: var(--muted);
+    margin-left: 2px;
+    font-weight: inherit;
     letter-spacing: 0;
   }
   .name {
@@ -137,6 +142,13 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+  :global(:root[data-theme="panel"]) .name,
+  :global(:root[data-theme="swiss"]) .name {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
   .empty {
     color: var(--muted);

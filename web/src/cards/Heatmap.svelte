@@ -59,7 +59,7 @@
   {/each}
   <g transform="translate(0 16)">
     {#each grid.cells as cell (cell.x * 10 + cell.y)}
-      <rect x={cell.x} y={cell.y} width={CELL} height={CELL} rx="3" class="l{cell.level}">
+      <rect x={cell.x} y={cell.y} width={CELL} height={CELL} class="l{cell.level}">
         <title>{dayFmt.format(cell.date)} · {cell.count} 次贡献</title>
       </rect>
     {/each}
@@ -79,10 +79,18 @@
   .month {
     font-size: 9.5px;
     fill: var(--muted);
-    font-family: var(--font-sans);
+    font-family: var(--font-mono);
+    letter-spacing: 0.06em;
   }
   rect {
     fill: var(--heat-0);
+    rx: var(--heat-radius, 1.5px);
+  }
+  :global(:root[data-theme="panel"]) rect {
+    rx: 1px;
+  }
+  :global(:root[data-theme="swiss"]) rect {
+    rx: 0;
   }
   .l1 {
     fill: var(--heat-1);

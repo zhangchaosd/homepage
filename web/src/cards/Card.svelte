@@ -6,25 +6,27 @@
   import { refreshWidget } from "../lib/api";
   import { now } from "../lib/clock.svelte";
 
+  /** A numbered section. Paper rules it off, panel frames it as a module,
+   *  swiss boxes it on a tinted field; the markup is the same. */
   let {
+    index,
     title,
     icon,
     slot,
     widget,
     link,
     linkLabel = "打开",
-    area,
     children,
     actions,
     onrefreshed,
   }: {
+    index: number;
     title: string;
     icon: string;
     slot?: Slot<unknown>;
     widget?: string;
     link?: string;
     linkLabel?: string;
-    area?: string;
     children: Snippet;
     actions?: Snippet;
     onrefreshed?: () => void;
@@ -46,33 +48,35 @@
   }
 
   const stale = $derived(!!slot?.error && !!slot?.data);
+  const num = $derived(String(index).padStart(2, "0"));
 </script>
 
-<section class="card" style:grid-area={area} aria-label={title}>
+<section class="card" style:--field="var(--field-{index})" aria-labelledby="section-{index}">
   <header>
     <div class="title">
-      <span class="glyph"><Icon name={icon} size={15} /></span>
-      <h2>{title}</h2>
+      <span class="label num">{num}</span>
+      <h2 id="section-{index}">{title}</h2>
+      <span class="glyph" aria-hidden="true"><Icon name={icon} size={14} /></span>
       {#if slot?.error}
         <span class="badge" class:stale title={slot.error}>
-          <Icon name="alert" size={12} stroke={2} />
-          {stale ? "数据可能过期" : "无法连接"}
+          <Icon name="alert" size={11} stroke={2} />
+          {stale ? "可能过期" : "无法连接"}
         </span>
       {/if}
     </div>
-    <div class="tools">
+    <div class="tools label">
       {@render actions?.()}
       {#if slot?.updatedAt && !slot.error}
         <span class="updated tnum" title="上次更新">{ago(slot.updatedAt, now.value)}</span>
       {/if}
       {#if widget}
-        <button class="tool pressable" class:spinning onclick={refresh} aria-label="刷新{title}" title="刷新">
-          <Icon name="refresh" size={14} />
+        <button class="tool link" class:spinning onclick={refresh} aria-label="刷新{title}">
+          <Icon name="refresh" size={12} /><span>刷新</span>
         </button>
       {/if}
       {#if link}
-        <a class="tool pressable" href={link} target="_blank" rel="noopener noreferrer" aria-label="{linkLabel}{title}" title={linkLabel}>
-          <Icon name="arrow-up-right" size={15} />
+        <a class="tool link" href={link} target="_blank" rel="noopener noreferrer" aria-label="{linkLabel}{title}">
+          <span>{linkLabel}</span><Icon name="arrow-up-right" size={12} />
         </a>
       {/if}
     </div>
@@ -99,46 +103,84 @@
     display: flex;
     flex-direction: column;
     min-width: 0;
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-card);
-    box-shadow: var(--shadow-card);
-    overflow: hidden;
+    height: 100%;
+    container-type: inline-size;
+    scroll-margin-top: 24px;
+    background: var(--card-bg);
+    border: var(--card-border-w) solid var(--card-border);
+    border-radius: var(--card-radius);
+    box-shadow: var(--card-shadow);
+  }
+  /* Swiss paints each section on its own tinted field. */
+  :global(:root[data-theme="swiss"]) .card {
+    background: var(--field, var(--surface));
   }
 
   header {
     display: flex;
-    align-items: center;
+    align-items: baseline;
     justify-content: space-between;
-    gap: 12px;
-    padding: 14px 14px 0 18px;
-    min-height: 46px;
+    gap: 16px;
+    padding: var(--card-pad-y) var(--card-pad-x) 0;
+    margin-bottom: 20px;
+  }
+  :global(:root[data-theme="panel"]) header,
+  :global(:root[data-theme="swiss"]) header {
+    align-items: center;
+    padding-bottom: var(--card-pad-y);
+    border-bottom: var(--card-border-w) solid var(--head-rule);
+    margin-bottom: 16px;
+  }
+  :global(:root[data-theme="swiss"]) header {
+    border-bottom-color: var(--line);
   }
 
   .title {
     display: flex;
-    align-items: center;
-    gap: 9px;
+    align-items: baseline;
+    gap: 14px;
     min-width: 0;
   }
-
-  .glyph {
-    display: grid;
-    place-items: center;
-    width: 26px;
-    height: 26px;
-    border-radius: 8px;
-    background: var(--surface-2);
-    border: 1px solid var(--line);
-    color: var(--ink-2);
+  :global(:root[data-theme="panel"]) .title,
+  :global(:root[data-theme="swiss"]) .title {
+    align-items: center;
+    gap: 10px;
+  }
+  .num {
+    color: var(--muted);
+  }
+  :global(:root[data-theme="panel"]) .num::before {
+    content: "";
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background: var(--accent);
+    margin-right: 10px;
+    vertical-align: 1px;
   }
 
   h2 {
     margin: 0;
-    font-size: 13.5px;
-    font-weight: 600;
-    letter-spacing: -0.005em;
+    font-family: var(--font-heading);
+    font-weight: var(--w-heading);
+    font-size: var(--size-heading);
+    letter-spacing: var(--ls-heading);
+    line-height: 1;
     white-space: nowrap;
+  }
+  :global(:root[data-theme="panel"]) h2 {
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+
+  /* The icon is a quiet secondary mark; paper hides it (the serif title is the mark). */
+  .glyph {
+    display: none;
+    color: var(--muted);
+  }
+  :global(:root[data-theme="panel"]) .glyph,
+  :global(:root[data-theme="swiss"]) .glyph {
+    display: inline-flex;
   }
 
   .badge {
@@ -146,8 +188,8 @@
     align-items: center;
     gap: 4px;
     padding: 2px 7px 2px 6px;
-    border-radius: 999px;
-    font-size: 11.5px;
+    border-radius: var(--chip-radius);
+    font-size: 11px;
     font-weight: 500;
     color: var(--danger);
     background: var(--danger-soft);
@@ -162,27 +204,40 @@
   .tools {
     display: flex;
     align-items: center;
-    gap: 2px;
-    color: var(--muted);
-  }
-
-  .updated {
-    font-size: 12px;
-    margin-right: 6px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 6px 18px;
     white-space: nowrap;
   }
-
-  .tool {
-    display: grid;
-    place-items: center;
-    width: 30px;
-    height: 30px;
-    border-radius: 9px;
+  /* Narrow columns: the title shrinks a step and the tools drop below it. */
+  @container (max-width: 380px) {
+    header {
+      flex-wrap: wrap;
+      row-gap: 10px;
+    }
+    h2 {
+      font-size: calc(var(--size-heading) * 0.8);
+    }
+    .tools {
+      flex-basis: 100%;
+      justify-content: flex-start;
+    }
+  }
+  .updated {
     color: var(--muted);
+  }
+  .tool {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--muted);
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    transition: color 160ms ease;
   }
   @media (hover: hover) and (pointer: fine) {
     .tool:hover {
-      background: var(--surface-hover);
       color: var(--ink);
     }
   }
@@ -194,13 +249,26 @@
       transform: rotate(360deg);
     }
   }
+  /* On phones the labels crowd the header: keep the icons only. */
+  @media (max-width: 480px) {
+    .tool span {
+      display: none;
+    }
+    .tools {
+      gap: 14px;
+    }
+  }
 
   .body {
     flex: 1;
     display: flex;
     flex-direction: column;
     min-height: 0;
-    padding: 12px 18px 18px;
+    padding: 0 var(--card-pad-x) var(--card-pad-x);
+  }
+  :global(:root[data-theme="paper"]) .body,
+  :global(:root:not([data-theme])) .body {
+    padding-bottom: 8px;
   }
 
   .skeleton {
@@ -209,9 +277,8 @@
     padding: 6px 0;
   }
   .skeleton span {
-    height: 12px;
-    border-radius: 6px;
-    background: linear-gradient(90deg, var(--heat-0), var(--line-strong), var(--heat-0));
+    height: 11px;
+    background: linear-gradient(90deg, var(--heat-0), var(--hair), var(--heat-0));
     background-size: 200% 100%;
     animation: shimmer 1.4s ease-in-out infinite;
   }
