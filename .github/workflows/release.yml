@@ -67,17 +67,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          package="homepage-${{ steps.version.outputs.version }}-${{ matrix.name }}"
-          mkdir -p "packages/${package}"
-          cp "target/${{ matrix.target }}/release/homepage" "packages/${package}/homepage"
-          "packages/${package}/homepage" --version
-          cp -R README.md LICENSE examples "packages/${package}/"
-          tar -C packages -czf "packages/${package}.tar.gz" "${package}"
-          rm -r "packages/${package}"
+          "target/${{ matrix.target }}/release/homepage" --version
+          .github/ci/package.sh "target/${{ matrix.target }}/release/homepage" "${{ matrix.name }}"
       - uses: actions/upload-artifact@v7
         with:
           name: release-${{ matrix.name }}
-          path: packages/*.tar.gz
+          path: out/*.tar.gz
           if-no-files-found: error
 
   publish:

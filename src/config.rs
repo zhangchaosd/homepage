@@ -28,13 +28,14 @@ use crate::{
 struct Cli {
     #[command(subcommand)]
     command: Option<Command>,
-    /// Directory holding config.toml, secrets.toml and server state.
+    /// Directory holding config.toml, secrets.toml and server state; defaults to the
+    /// current directory.
     #[arg(
         long,
         short = 'c',
         value_name = "DIR",
         env = "HOMEPAGE_CONFIG_DIR",
-        default_value = "config"
+        default_value = "."
     )]
     config_dir: PathBuf,
     /// Overrides `server.listen`.

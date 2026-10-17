@@ -77,7 +77,12 @@ fn init_tracing(level: &str) {
     let filter =
         tracing_subscriber::EnvFilter::try_new(format!("homepage={level},tower_http=warn"))
             .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info"));
-    tracing_subscriber::fmt().with_env_filter(filter).init();
+    // Color codes only for a terminal, not for systemd's log file or the journal.
+    let ansi = std::io::IsTerminal::is_terminal(&std::io::stdout());
+    tracing_subscriber::fmt()
+        .with_env_filter(filter)
+        .with_ansi(ansi)
+        .init();
 }
 
 fn hash_password() -> ExitCode {

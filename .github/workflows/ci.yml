@@ -23,3 +23,51 @@ jobs:
       - run: cargo fmt --check
       - run: cargo clippy --locked --all-targets -- -D warnings
       - run: cargo test --locked
+
+  # Runs the README's install steps verbatim (with a local build instead of the
+  # release download), checks the running user service, then uninstalls.
+  install-linux:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - uses: dtolnay/rust-toolchain@stable
+      - run: npm ci && npm run build
+        working-directory: web
+      - run: cargo build --release --locked
+      - name: Package like a release
+        run: .github/ci/package.sh target/release/homepage linux-x86_64
+      - name: Start the user service manager
+        run: |
+          sudo loginctl enable-linger "$USER"
+          echo "XDG_RUNTIME_DIR=/run/user/$(id -u)" >> "$GITHUB_ENV"
+          for _ in $(seq 1 30); do [ -S "/run/user/$(id -u)/bus" ] && break; sleep 1; done
+      - name: Install (README steps)
+        run: .github/ci/readme-install.sh install out/homepage-linux-x86_64.tar.gz
+      - name: Verify
+        run: |
+          set -euxo pipefail
+          systemctl --user is-active homepage
+          pid=$(systemctl --user show homepage -p MainPID --value)
+          test "$(ps -o user= -p "$pid")" = "$USER"
+          curl -fsS http://127.0.0.1:8780/api/v1/system
+          # Logging in writes state/sessions.json next to the config.
+          curl -fsS -H 'content-type: application/json' \
+            -d '{"username":"chao","password":"ci-test-password-123"}' http://127.0.0.1:8780/api/v1/auth/login
+          test -f ~/homepage/state/sessions.json
+          test "$(stat -c %a ~/homepage/secrets.toml)" = 600
+          grep -q listening ~/homepage/homepage.log
+          ! grep -q $'\e\[' ~/homepage/homepage.log   # plain text, no color codes
+          (cd ~/homepage && ./homepage update check)
+      - name: Logs
+        if: always()
+        run: cat ~/homepage/homepage.log || true
+      - name: Uninstall (README steps)
+        run: |
+          .github/ci/readme-install.sh uninstall
+          ! test -e ~/homepage
+          ! systemctl --user is-active homepage

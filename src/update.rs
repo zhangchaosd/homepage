@@ -110,8 +110,9 @@ pub fn platform() -> Option<&'static str> {
     }
 }
 
-fn asset_name(version: &str) -> Option<String> {
-    platform().map(|platform| format!("homepage-{version}-{platform}.tar.gz"))
+/// Release archives carry no version so `releases/latest/download/…` links stay stable.
+fn asset_name() -> Option<String> {
+    platform().map(|platform| format!("homepage-{platform}.tar.gz"))
 }
 
 /// Replacing and re-executing the running binary needs Unix semantics.
@@ -154,7 +155,7 @@ pub fn select(releases: &Value, channel: &str, current: &str) -> Option<Release>
                     .collect(),
                 published_at: release["published_at"].as_str().unwrap_or_default().into(),
                 prerelease: release["prerelease"].as_bool().unwrap_or(false),
-                asset_url: asset_name(&version).and_then(|name| asset(&name)),
+                asset_url: asset_name().and_then(|name| asset(&name)),
                 sums_url: asset(SUMS),
                 version,
             }
@@ -398,7 +399,7 @@ impl Updater {
                     "release information is stale; check for updates again".into(),
                 )
             })?;
-        let name = asset_name(version).unwrap_or_default();
+        let name = asset_name().unwrap_or_default();
         let asset_url = release
             .asset_url
             .as_deref()
@@ -584,7 +585,7 @@ mod tests {
     use super::*;
 
     fn listing() -> Value {
-        let asset = asset_name("0.4.0").unwrap_or_else(|| "none".into());
+        let asset = asset_name().unwrap_or_else(|| "none".into());
         json!([
             {"tag_name":"v0.5.0-beta.1","draft":false,"prerelease":true,"assets":[]},
             {"tag_name":"v0.4.1","draft":true,"prerelease":false,"assets":[]},
@@ -616,9 +617,9 @@ mod tests {
 
     #[test]
     fn reads_sha256sums() {
-        let sums = "ABC123  homepage-0.5.0-linux-x86_64.tar.gz\ndef456 *SHA256SUMS.txt\n";
+        let sums = "ABC123  homepage-linux-x86_64.tar.gz\ndef456 *SHA256SUMS.txt\n";
         assert_eq!(
-            expected_digest(sums, "homepage-0.5.0-linux-x86_64.tar.gz").as_deref(),
+            expected_digest(sums, "homepage-linux-x86_64.tar.gz").as_deref(),
             Some("abc123")
         );
         assert_eq!(expected_digest(sums, SUMS).as_deref(), Some("def456"));
@@ -632,11 +633,8 @@ mod tests {
             let encoder = flate2::write::GzEncoder::new(&mut archive, flate2::Compression::fast());
             let mut builder = tar::Builder::new(encoder);
             for (path, data) in [
-                (
-                    "homepage-0.5.0-linux-x86_64/README.md",
-                    b"readme".as_slice(),
-                ),
-                ("homepage-0.5.0-linux-x86_64/homepage", b"binary".as_slice()),
+                ("homepage-linux-x86_64/README.md", b"readme".as_slice()),
+                ("homepage-linux-x86_64/homepage", b"binary".as_slice()),
             ] {
                 let mut header = tar::Header::new_gnu();
                 header.set_size(data.len() as u64);

@@ -5,16 +5,17 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-User=homepage
-Group=homepage
 ExecStart=/opt/homepage/homepage --config-dir /etc/homepage
 Restart=on-failure
 RestartSec=3
 
-# Writable at runtime: the config directory (state/sessions.json, update.json and
-# the passkey sign counters in auth.db) and the program directory, where in-app
-# updates replace the binary and keep the previous one as homepage.old.
+# Runs without a dedicated user, so the sandbox does the confining: no
+# capabilities, and the only writable paths are the config directory
+# (state/, passkey sign counters in auth.db) and the program directory, where
+# in-app updates replace the binary and keep the previous one as homepage.old.
 ReadWritePaths=/etc/homepage /opt/homepage
+CapabilityBoundingSet=
+AmbientCapabilities=
 NoNewPrivileges=yes
 ProtectSystem=strict
 ProtectHome=yes
@@ -22,13 +23,17 @@ PrivateTmp=yes
 PrivateDevices=yes
 ProtectKernelTunables=yes
 ProtectKernelModules=yes
+ProtectKernelLogs=yes
 ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
 RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
 RestrictNamespaces=yes
+RestrictSUIDSGID=yes
+RestrictRealtime=yes
 LockPersonality=yes
 MemoryDenyWriteExecute=yes
 SystemCallArchitectures=native
-CapabilityBoundingSet=
 UMask=0077
 
 [Install]

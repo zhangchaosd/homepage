@@ -27,46 +27,57 @@
 
 ## 安装
 
-### Linux（systemd）
+### Linux（systemd 用户服务）
 
-从 [GitHub Release](https://github.com/zhangchaosd/homepage/releases) 下载对应架构的单文件二进制（`uname -m` 为 `x86_64` 或 `aarch64`），然后安装为系统服务。服务以专用的 `homepage` 系统用户运行；程序目录 `/opt/homepage` 归它所有，这样页面上的在线更新才能替换二进制。Linux 版需要 glibc 2.39 或更新（Ubuntu 24.04+、Debian 13+）。
+所有文件都放在 `~/homepage` 目录下，以当前用户身份运行，不需要 sudo：
 
 ```sh
-VERSION=0.1.0
-PKG=homepage-$VERSION-linux-$(uname -m)
-curl -fLO https://github.com/zhangchaosd/homepage/releases/download/v$VERSION/$PKG.tar.gz
-tar xzf $PKG.tar.gz
-sudo useradd --system --no-create-home --shell /usr/sbin/nologin homepage
-sudo install -d -o homepage -g homepage -m 755 /opt/homepage
-sudo install -o homepage -g homepage -m 755 $PKG/homepage /opt/homepage/homepage
-sudo ln -sf /opt/homepage/homepage /usr/local/bin/homepage
-sudo install -d -o homepage -g homepage -m 700 /etc/homepage
-sudo install -o homepage -g homepage -m 600 $PKG/examples/config/config.toml /etc/homepage/config.toml
-homepage hash-password | sudo install -o homepage -g homepage -m 600 /dev/stdin /etc/homepage/secrets.toml
-sudoedit /etc/homepage/config.toml /etc/homepage/secrets.toml
-sudo -u homepage homepage -c /etc/homepage check-config
-sudo install -m 644 $PKG/examples/homepage.service /etc/systemd/system/homepage.service
-sudo systemctl daemon-reload
-sudo systemctl enable --now homepage
+mkdir -p ~/homepage && cd ~/homepage
+curl -fsSL https://github.com/zhangchaosd/homepage/releases/latest/download/homepage-linux-$(uname -m).tar.gz | tar -xz --strip-components=1
+cp -n examples/config/config.toml config.toml
+(umask 077 && ./homepage hash-password > secrets.toml)
+${EDITOR:-vi} config.toml secrets.toml
+./homepage check-config
+cat > homepage.service <<'EOF'
+[Unit]
+Description=Homepage — personal start page
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/homepage
+ExecStart=%h/homepage/homepage
+Restart=on-failure
+RestartSec=5
+UMask=0077
+StandardOutput=append:%h/homepage/homepage.log
+StandardError=append:%h/homepage/homepage.log
+
+[Install]
+WantedBy=default.target
+EOF
+systemctl --user enable --now ~/homepage/homepage.service
 curl -s --retry 5 --retry-connrefused http://127.0.0.1:8780/healthz
 ```
 
-`hash-password` 会提示输入两次登录密码，`secrets.toml` 里先只有密码哈希；在 `sudoedit` 中改好 `config.toml` 里的地址，并按 `$PKG/examples/config/secrets.toml.example` 往 `secrets.toml` 加上各服务的 token。`check-config` 通过后再启动服务。
+`hash-password` 会提示输入两次登录密码，`secrets.toml` 里先只有密码哈希。在编辑器里改好 `config.toml` 中各服务的地址，并参照 `examples/config/secrets.toml.example` 往 `secrets.toml` 加上 token；`check-config` 通过后再启动服务。Linux 版需要 glibc 2.39 或更新（Ubuntu 24.04+、Debian 13+）。
 
-配置：`/etc/homepage/config.toml` 和 `/etc/homepage/secrets.toml`。重启：`sudo systemctl restart homepage`。日志：`journalctl -u homepage`。以后升级在页面右上角一键完成（见[更新](#更新)），不需要重复这些步骤。服务运行在 systemd 沙箱里：只有 `/etc/homepage` 和 `/opt/homepage` 可写，没有任何 capability。
+修改配置：编辑 `~/homepage/config.toml` 或 `secrets.toml`，然后执行 `systemctl --user restart homepage`。
+日志：`~/homepage/homepage.log`。以后升级在页面右上角一键完成（见[更新](#更新)），不需要重复这些步骤。如需开机后无需登录即自动运行，执行 `loginctl enable-linger`
+（部分系统需要 `sudo loginctl enable-linger $USER`）。
 
 卸载：
 
 ```sh
-sudo systemctl disable --now homepage
-sudo rm -r /opt/homepage /etc/homepage /usr/local/bin/homepage /etc/systemd/system/homepage.service
-sudo systemctl daemon-reload
-sudo userdel homepage
+systemctl --user disable --now homepage
+rm -rf ~/homepage
 ```
+
+如需加固的系统级服务，可参考 [examples/homepage.service](examples/homepage.service)（程序放在 `/opt/homepage`，配置放在 `/etc/homepage`）。
 
 ### 从源码构建
 
-需要 Rust 1.88+ 和 Node 20+（只在构建时需要）。产物是 `target/release/homepage`，用它替换上面步骤里解压出的 `$PKG/homepage` 即可。
+需要 Rust 1.88+ 和 Node 20+（只在构建时需要）。产物是 `target/release/homepage`，复制到 `~/homepage/homepage` 即可代替下载。
 
 ```bash
 scripts/build.sh
@@ -76,13 +87,18 @@ TARGET=x86_64-unknown-linux-gnu scripts/build.sh   # 交叉编译
 ## 配置
 
 ```
-/etc/homepage/
-├── config.toml     # 服务、设备、组件（参考 examples/config/config.toml）
-├── secrets.toml    # 密码哈希和各种 token，权限 600
-├── auth.db         # 从 bookmarkd 复制的 Passkey 数据库（可选）
-├── icons/          # 自定义服务图标（可选）
-└── state/          # 运行时写入（会话、更新状态），自动创建
+~/homepage/
+├── homepage          # 程序本身，在线更新时原地替换（旧版本保留为 homepage.old）
+├── config.toml       # 服务、设备、组件（参考 examples/config/config.toml）
+├── secrets.toml      # 密码哈希和各种 token，权限 600
+├── auth.db           # 从 bookmarkd 复制的 Passkey 数据库（可选）
+├── icons/            # 自定义服务图标（可选）
+├── state/            # 运行时写入（会话、更新状态），自动创建
+├── homepage.log
+└── homepage.service
 ```
+
+`homepage` 默认把当前目录当作配置目录；从别处运行时用 `-c <目录>` 指定。
 
 ### Passkey（复用 bookmarkd）
 
@@ -91,11 +107,10 @@ Passkey 绑定在 RP ID 上（例如 `example.com`），所以主页的 `public_
 ```sh
 # 在 bookmarkd 所在机器上（sqlite3 .backup 保证拿到一致的副本）
 sqlite3 /var/lib/bookmarkd/auth.db ".backup /tmp/auth.db"
-scp /tmp/auth.db homepage-server:/tmp/auth.db
-# 在 homepage 所在机器上
-sudo install -o homepage -g homepage -m 600 /tmp/auth.db /etc/homepage/auth.db
-sudoedit /etc/homepage/config.toml   # 取消 [auth] 里 passkey_db = "auth.db" 的注释
-sudo systemctl restart homepage
+scp /tmp/auth.db homepage-server:homepage/auth.db
+# 在 homepage 所在机器上：取消 config.toml 中 [auth] 里 passkey_db = "auth.db" 的注释
+chmod 600 ~/homepage/auth.db
+systemctl --user restart homepage
 ```
 
 注意：
@@ -128,7 +143,7 @@ trusted_proxies = ["192.168.1.2/32"]   # 网关机的局域网地址
 
 ## 更新
 
-**发版**（在开发机上）：改 `Cargo.toml` 的 `version`，提交后打同名 tag 推送即可，GitHub Actions 会构建四个平台并发布 Release。tag 必须和 `Cargo.toml` 版本一致，否则工作流会失败（更新器会校验新二进制报告的版本号）。带 `-` 的 tag（如 `v0.2.0-beta.1`）发布为预发布版。
+**发版**（在开发机上）：改 `Cargo.toml` 的 `version`，提交后打同名 tag 推送即可，GitHub Actions 会构建四个平台并发布 Release。文件名不带版本号（如 `homepage-linux-x86_64.tar.gz`），所以安装命令里的 `latest/download` 链接始终指向最新版。tag 必须和 `Cargo.toml` 版本一致，否则工作流会失败（更新器会校验新二进制报告的版本号）。带 `-` 的 tag（如 `v0.2.0-beta.1`）发布为预发布版。
 
 ```bash
 git commit -am "Release v0.2.0" && git tag v0.2.0 && git push origin main v0.2.0
@@ -146,9 +161,10 @@ git commit -am "Release v0.2.0" && git tag v0.2.0 && git push origin main v0.2.0
 命令行也可以操作：
 
 ```bash
-sudo -u homepage homepage -c /etc/homepage update check
-sudo -u homepage homepage -c /etc/homepage update install --yes   # 之后 sudo systemctl restart homepage
-sudo -u homepage homepage -c /etc/homepage update rollback --yes  # 换回 homepage.old
+cd ~/homepage
+./homepage update check
+./homepage update install --yes    # 之后 systemctl --user restart homepage
+./homepage update rollback --yes   # 换回 homepage.old
 ```
 
 ## 各组件的准备工作
