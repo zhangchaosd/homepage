@@ -109,7 +109,8 @@ prerelease=()
 [[ "$version" == *-* ]] && prerelease=(--prerelease)
 git tag -a "$tag" -m "Homepage $tag"
 git push origin main "$tag"
-gh release create "$tag" --repo "$repo" --verify-tag --generate-notes "${prerelease[@]}" --title "Homepage $tag" \
+# ${arr[@]+...} keeps an empty array working under set -u in macOS bash 3.2.
+gh release create "$tag" --repo "$repo" --verify-tag --generate-notes ${prerelease[@]+"${prerelease[@]}"} --title "Homepage $tag" \
   "${assets[@]/#/$out/}" "$out/SHA256SUMS.txt"
 check=$(mktemp -d)
 gh release download "$tag" --repo "$repo" --dir "$check"
