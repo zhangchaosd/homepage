@@ -95,6 +95,7 @@
                   <span class="sub">{service.description || host(service.url)}</span>
                 </span>
                 {#if status}
+                  {#if status.up && status.latencyMs !== null}<span class="lat mono">{status.latencyMs} ms</span>{/if}
                   <span
                     class="dot"
                     class:down={!status.up}
@@ -241,6 +242,15 @@
     position: absolute;
     top: 12px;
     right: 12px;
+  }
+  /* The latency readout; themes that want it turn it on. */
+  .lat {
+    display: none;
+    position: absolute;
+    top: 10px;
+    right: 26px;
+    font-size: 10.5px;
+    color: var(--muted);
   }
 
   .empty {

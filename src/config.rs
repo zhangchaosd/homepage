@@ -117,7 +117,7 @@ pub struct Profile {
     #[serde(default)]
     pub title: Option<String>,
     /// Default look: "paper" (晨报), "panel" (控制台), "swiss" (工作台),
-    /// "scifi" (科幻) or "future" (未来).
+    /// "scifi" (科幻), "future" (未来), "tech" (科技) or "industrial" (工业).
     /// Each browser can override it in the settings dialog.
     #[serde(default)]
     pub theme: Option<String>,

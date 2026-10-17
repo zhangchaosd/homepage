@@ -6,7 +6,7 @@
  * built on (ruled, panel or swiss), so components style a family once and the
  * newer themes (themes/*.css) only add their own look on top. */
 
-export type ThemeName = "paper" | "panel" | "swiss" | "scifi" | "future";
+export type ThemeName = "paper" | "panel" | "swiss" | "scifi" | "future" | "tech" | "industrial";
 export type Mode = "auto" | "light" | "dark";
 
 export const THEMES: { id: ThemeName; name: string; blurb: string }[] = [
@@ -15,6 +15,8 @@ export const THEMES: { id: ThemeName; name: string; blurb: string }[] = [
   { id: "swiss", name: "工作台", blurb: "粗黑标题、硬边框、色块与宝蓝" },
   { id: "scifi", name: "科幻", blurb: "舰桥 HUD、角标边框、青色读数" },
   { id: "future", name: "未来", blurb: "陶瓷与光、大圆角、紫色与荧光绿" },
+  { id: "tech", name: "科技", blurb: "遥测仪表、电光蓝、延迟读数" },
+  { id: "industrial", name: "工业", blurb: "服务器面板、点阵液晶、实体按键" },
 ];
 
 const FAMILY: Record<ThemeName, "ruled" | "panel" | "swiss"> = {
@@ -23,6 +25,8 @@ const FAMILY: Record<ThemeName, "ruled" | "panel" | "swiss"> = {
   swiss: "swiss",
   scifi: "panel",
   future: "panel",
+  tech: "panel",
+  industrial: "panel",
 };
 
 const THEME_KEY = "hp-theme";

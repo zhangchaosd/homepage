@@ -1,0 +1,258 @@
+/* =====================================================================
+   科技 tech — telemetry. Built on the panel family; this file sets its
+   tokens and the signature details: electric blue, a pulse before every
+   section title, headline figures as arc gauges, label chips, latency
+   readouts on the service tiles, a dot grid behind everything.
+
+   Rules under :root[data-theme="tech"]:not(#_) carry an id's weight so
+   they win over the components' scoped panel-family rules.
+   ===================================================================== */
+
+:root[data-theme="tech"] {
+  --font-sans: "Sora Variable", -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC",
+    sans-serif;
+  --font-mono: "DM Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --bg: light-dark(#eef2f9, #0f1420);
+  --bg-2: light-dark(#e6ebf5, #131927);
+  --surface: light-dark(#ffffff, #161c2b);
+  --surface-2: light-dark(#f4f7fc, #1d2435);
+  --surface-hover: light-dark(#eaf0fa, #232b3f);
+  --ink: light-dark(#0e1626, #e8edf7);
+  --ink-2: light-dark(#3b4762, #b3bdd1);
+  --muted: light-dark(#687591, #8591a9);
+  --faint: light-dark(#b7c0d3, #4a5570);
+  --line: light-dark(#d9e0ee, #283145);
+  --hair: light-dark(#e6ebf4, #212939);
+  --hair-soft: light-dark(#eef2f8, #1b2231);
+  --accent: light-dark(#1f5eff, #3d7bff);
+  --accent-ink: light-dark(#1a4fd6, #7aa6ff);
+  --accent-soft: light-dark(rgba(31, 94, 255, 0.08), rgba(61, 123, 255, 0.12));
+  --on-accent: #ffffff;
+  --glow: light-dark(rgba(31, 94, 255, 0.22), rgba(61, 123, 255, 0.38));
+  --ok: light-dark(#0f9f5f, #2fd38a);
+  --ok-soft: light-dark(rgba(15, 159, 95, 0.12), rgba(47, 211, 138, 0.12));
+  --warn: light-dark(#b36f00, #ffb020);
+  --warn-soft: light-dark(rgba(179, 111, 0, 0.12), rgba(255, 176, 32, 0.12));
+  --danger: light-dark(#d92a48, #ff5470);
+  --danger-soft: light-dark(rgba(217, 42, 72, 0.08), rgba(255, 84, 112, 0.1));
+  --data: var(--accent);
+  --dot: light-dark(rgba(31, 94, 255, 0.12), rgba(122, 166, 255, 0.09));
+  --heat-0: light-dark(#e3e9f4, #1b2233);
+  --heat-1: light-dark(#c3d4ff, #1e3470);
+  --heat-2: light-dark(#86a9ff, #2a4fb3);
+  --heat-3: light-dark(#4a7dff, #3d7bff);
+  --heat-4: light-dark(#1a4fd6, #9bbcff);
+
+  --font-display: var(--font-sans);
+  --font-heading: var(--font-sans);
+  --font-number: var(--font-sans);
+  --w-display: 600;
+  --w-heading: 600;
+  --w-number: 600;
+  --ls-display: -0.035em;
+  --ls-heading: -0.01em;
+  --ls-number: -0.03em;
+  --size-heading: 14px;
+  --size-display: clamp(36px, 4.2vw, 56px);
+  --lh-display: 1.05;
+  --transform-label: none;
+  --ls-label: 0.06em;
+
+  --card-bg: var(--surface);
+  --card-border: var(--line);
+  --card-border-w: 1px;
+  --card-radius: 14px;
+  --card-shadow: inset 0 1px 0 light-dark(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.05));
+  --card-pad-x: 16px;
+  --card-pad-y: 12px;
+  --section-rule: transparent;
+  --section-rule-sub: transparent;
+  --col-rule: transparent;
+  --head-rule: var(--hair);
+  --tile-bg: var(--surface);
+  --tile-border: var(--hair);
+  --tile-radius: 10px;
+  --tile-gap: 8px;
+  --tile-grid-bg: transparent;
+  --input-bg: var(--bg);
+  --input-border: var(--line);
+  --input-radius: 9px;
+  --btn-bg: var(--accent);
+  --btn-fg: var(--on-accent);
+  --btn-radius: 7px;
+  --chip-radius: 999px;
+}
+
+/* The dot grid. */
+:root[data-theme="tech"] body {
+  background-image: radial-gradient(var(--dot) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+/* Section titles: a live pulse instead of a number. */
+:root[data-theme="tech"]:not(#_) section.card header .num {
+  display: none;
+}
+:root[data-theme="tech"]:not(#_) section.card h2 {
+  text-transform: none;
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+:root[data-theme="tech"]:not(#_) section.card h2::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft), 0 0 10px var(--glow);
+}
+:root[data-theme="tech"]:not(#_) section.card header .glyph {
+  display: none;
+}
+:root[data-theme="tech"]:not(#_) .label {
+  letter-spacing: 0.06em;
+}
+
+/* Masthead: a full bar on the panel colour; the brand mark glows. */
+:root[data-theme="tech"]:not(#_) .mast {
+  border-radius: 10px;
+}
+:root[data-theme="tech"]:not(#_) .brand {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-transform: lowercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+:root[data-theme="tech"]:not(#_) .brand::before {
+  content: "";
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  background: radial-gradient(circle, #fff 0 3px, transparent 3.5px), var(--accent);
+  box-shadow: 0 0 14px var(--glow);
+}
+:root[data-theme="tech"]:not(#_) .brand .period {
+  display: none;
+}
+:root[data-theme="tech"]:not(#_) .stamp .time {
+  color: var(--ink-2);
+}
+
+/* Hero figures: arc gauges filled to the ratio. */
+:root[data-theme="tech"]:not(#_) h1 em {
+  color: var(--accent);
+}
+:root[data-theme="tech"]:not(#_) .tagline {
+  font-family: var(--font-sans);
+  color: var(--muted);
+  font-size: 14px;
+}
+:root[data-theme="tech"]:not(#_) .index {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+}
+:root[data-theme="tech"]:not(#_) .index li {
+  --fill: var(--accent);
+  border: 1px solid var(--line);
+  border-radius: var(--card-radius);
+  background: var(--surface);
+  box-shadow: var(--card-shadow);
+}
+:root[data-theme="tech"]:not(#_) .index li:last-child {
+  border-right: 1px solid var(--line);
+}
+:root[data-theme="tech"]:not(#_) .index li[data-key="todo"] {
+  --fill: var(--warn);
+}
+:root[data-theme="tech"]:not(#_) .index a {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  column-gap: 12px;
+  row-gap: 4px;
+  align-items: center;
+  padding: 12px 14px;
+}
+:root[data-theme="tech"]:not(#_) .index a::before {
+  content: "";
+  grid-row: 1 / span 2;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: conic-gradient(var(--fill) calc(var(--pct, 0.5) * 100%), var(--hair) 0);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 6px), #000 calc(100% - 5px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 6px), #000 calc(100% - 5px));
+}
+:root[data-theme="tech"]:not(#_) .index a:hover {
+  padding-left: 14px;
+  background: transparent;
+}
+:root[data-theme="tech"]:not(#_) .index .k {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: none;
+  color: var(--muted);
+}
+:root[data-theme="tech"]:not(#_) .index .n {
+  font-size: 28px;
+  color: var(--ink);
+}
+:root[data-theme="tech"]:not(#_) .index li[data-key="todo"] .n {
+  color: var(--warn);
+}
+
+/* Modules. */
+:root[data-theme="tech"]:not(#_) section.card .figure {
+  color: var(--ink);
+}
+:root[data-theme="tech"]:not(#_) .check {
+  border-radius: 5px;
+  border-width: 1.5px;
+}
+/* Task labels as chips. */
+:root[data-theme="tech"]:not(#_) .tag {
+  height: 20px;
+  padding: 0 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--ink-2);
+}
+:root[data-theme="tech"]:not(#_) .tag::before {
+  display: none;
+}
+:root[data-theme="tech"]:not(#_) .btn.primary,
+:root[data-theme="tech"]:not(#_) .send {
+  box-shadow: 0 6px 14px -6px var(--glow);
+}
+:root[data-theme="tech"]:not(#_) .dot {
+  box-shadow: 0 0 8px var(--ok);
+}
+:root[data-theme="tech"]:not(#_) .dot.down {
+  box-shadow: 0 0 8px var(--danger);
+}
+
+/* Services: the latency readout sits in the row, before the status light. */
+:root[data-theme="tech"]:not(#_) .tile {
+  border: 1px solid var(--hair);
+  padding-right: 28px;
+}
+:root[data-theme="tech"]:not(#_) .tile .lat {
+  display: inline-flex;
+  position: static;
+  flex: none;
+  align-self: flex-start;
+  margin-top: 1px;
+}

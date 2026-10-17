@@ -1,0 +1,320 @@
+/* =====================================================================
+   工业 industrial — the front panel of a home server. Built on the panel
+   family; this file sets its tokens and the hardware details: a warm
+   grey chassis (anodised black in dark), orange, screws on every module,
+   dot-matrix figures on recessed LCD panels, raised keys for services
+   with LEDs, inset wells for inputs and checks.
+
+   Rules under :root[data-theme="industrial"]:not(#_) carry an id's weight
+   so they win over the components' scoped panel-family rules.
+   ===================================================================== */
+
+:root[data-theme="industrial"] {
+  --font-sans: "Space Grotesk Variable", -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+    "Noto Sans CJK SC", sans-serif;
+  --font-mono: "Space Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-dot: "Doto Variable", "Space Mono", monospace;
+
+  --bg: light-dark(#dddbd5, #121211);
+  --bg-2: light-dark(#d4d2cb, #0e0e0d);
+  --surface: light-dark(#f1efea, #20201e);
+  --surface-2: light-dark(#e9e7e1, #1a1a18);
+  --surface-hover: light-dark(#e3e1da, #272725);
+  --well: light-dark(#e2e0d9, #161615);
+  --ink: light-dark(#1b1b19, #ebe8e1);
+  --ink-2: light-dark(#4a4944, #b5b1a7);
+  --muted: light-dark(#85827a, #7c7a72);
+  --faint: light-dark(#b9b6ad, #4a4944);
+  --line: light-dark(#c9c6be, #2c2c29);
+  --hair: light-dark(#d6d3cb, #2a2a27);
+  --hair-soft: light-dark(#e0ddd5, #242422);
+  --hi: light-dark(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.05));
+  --sh: light-dark(rgba(80, 70, 50, 0.18), rgba(0, 0, 0, 0.6));
+  --accent: light-dark(#e0491a, #ff6a2b);
+  --accent-ink: light-dark(#c53f14, #ff8a55);
+  --accent-soft: light-dark(rgba(224, 73, 26, 0.1), rgba(255, 106, 43, 0.14));
+  --accent-deep: light-dark(#b8400f, #b8400f);
+  --on-accent: #ffffff;
+  --ok: light-dark(#2e9e5b, #4fd27f);
+  --ok-soft: light-dark(rgba(46, 158, 91, 0.12), rgba(79, 210, 127, 0.12));
+  --warn: light-dark(#b07400, #f0a52a);
+  --warn-soft: light-dark(rgba(176, 116, 0, 0.12), rgba(240, 165, 42, 0.14));
+  --danger: light-dark(#e2381f, #ff5a3d);
+  --danger-soft: light-dark(rgba(226, 56, 31, 0.1), rgba(255, 90, 61, 0.12));
+  --data: var(--accent);
+  --lcd: light-dark(#d9d6ce, #0b0b0a);
+  --lcd-ink: light-dark(#d9480f, #ff7a3d);
+  --lcd-dim: light-dark(#bdb4a8, #33241b);
+  --lcd-cap: light-dark(#8b857a, #8a7d70);
+  --lcd-rule: light-dark(#c8c4bb, #2c2a24);
+  --lcd-shadow: light-dark(
+    inset 0 1px 3px rgba(80, 70, 50, 0.22),
+    inset 0 2px 6px rgba(0, 0, 0, 0.6)
+  );
+  --heat-0: light-dark(#d2cfc7, #1b1b19);
+  --heat-1: light-dark(#f3c9b4, #4a2412);
+  --heat-2: light-dark(#f39a6f, #8a3a14);
+  --heat-3: light-dark(#ec6a33, #d05a1e);
+  --heat-4: light-dark(#c53f14, #ff8a55);
+
+  --font-display: var(--font-sans);
+  --font-heading: var(--font-sans);
+  --font-number: var(--font-dot);
+  --w-display: 700;
+  --w-heading: 700;
+  --w-number: 800;
+  --ls-display: -0.05em;
+  --ls-heading: -0.02em;
+  --ls-number: 0.02em;
+  --size-heading: 17px;
+  --size-display: clamp(44px, 5.4vw, 72px);
+  --lh-display: 1;
+  --transform-label: uppercase;
+  --ls-label: 0.12em;
+
+  --card-bg: var(--surface);
+  --card-border: var(--line);
+  --card-border-w: 1px;
+  --card-radius: 14px;
+  --card-shadow: inset 0 1px 0 var(--hi), 0 2px 0 var(--line), 0 14px 24px -18px var(--sh);
+  --card-pad-x: 18px;
+  --card-pad-y: 14px;
+  --section-rule: transparent;
+  --section-rule-sub: transparent;
+  --col-rule: transparent;
+  --head-rule: transparent;
+  --tile-bg: var(--surface-2);
+  --tile-border: var(--line);
+  --tile-radius: 10px;
+  --tile-gap: 10px;
+  --tile-grid-bg: transparent;
+  --input-bg: var(--well);
+  --input-border: transparent;
+  --input-radius: 9px;
+  --btn-bg: var(--accent);
+  --btn-fg: var(--on-accent);
+  --btn-radius: 9px;
+  --chip-radius: 6px;
+}
+
+/* Screws in the top corners of every module and the masthead. */
+:root[data-theme="industrial"]:not(#_) :is(section.card, .mast) {
+  position: relative;
+}
+:root[data-theme="industrial"]:not(#_) :is(section.card, .mast)::before,
+:root[data-theme="industrial"]:not(#_) :is(section.card, .mast)::after {
+  content: "";
+  position: absolute;
+  top: 8px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--well);
+  box-shadow: inset 0 1px 1px var(--sh), 0 1px 0 var(--hi);
+  pointer-events: none;
+}
+:root[data-theme="industrial"]:not(#_) :is(section.card, .mast)::before {
+  left: 8px;
+}
+:root[data-theme="industrial"]:not(#_) :is(section.card, .mast)::after {
+  right: 8px;
+}
+:root[data-theme="industrial"]:not(#_) .mast::before,
+:root[data-theme="industrial"]:not(#_) .mast::after {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Masthead: the brand badge and an LCD clock. */
+:root[data-theme="industrial"]:not(#_) .mast {
+  padding: 8px 24px 8px 28px;
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+}
+:root[data-theme="industrial"]:not(#_) .brand {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+:root[data-theme="industrial"]:not(#_) .brand::before {
+  content: "";
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  background: radial-gradient(circle, #fff 0 3.5px, transparent 4px), var(--accent);
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.2);
+}
+:root[data-theme="industrial"]:not(#_) .brand .period {
+  display: none;
+}
+:root[data-theme="industrial"]:not(#_) .stamp .time {
+  font-family: var(--font-dot);
+  font-weight: 800;
+  font-size: 17px;
+  letter-spacing: 0.02em;
+  padding: 2px 9px;
+  border-radius: 6px;
+  background: var(--lcd);
+  color: var(--lcd-ink);
+  box-shadow: var(--lcd-shadow);
+}
+:root[data-theme="industrial"]:not(#_) .search {
+  border-radius: 9px;
+  border-color: transparent;
+  background: var(--well);
+  box-shadow: inset 0 1px 3px var(--sh);
+}
+
+/* Hero: the greeting on a module, the figures on one LCD panel. */
+:root[data-theme="industrial"]:not(#_) .hero {
+  padding: 0;
+  margin-top: 16px;
+  gap: 16px;
+  align-items: stretch;
+}
+:root[data-theme="industrial"]:not(#_) .hello {
+  padding: 24px 28px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+}
+:root[data-theme="industrial"]:not(#_) h1 em {
+  color: var(--accent);
+}
+:root[data-theme="industrial"]:not(#_) .tagline {
+  font-family: var(--font-sans);
+  color: var(--ink-2);
+  font-size: 15px;
+}
+:root[data-theme="industrial"]:not(#_) .index {
+  align-self: stretch;
+  gap: 0;
+  padding: 14px 6px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--lcd);
+  box-shadow: var(--lcd-shadow);
+  overflow: hidden;
+  align-content: center;
+}
+:root[data-theme="industrial"]:not(#_) .index li {
+  border: 0;
+  border-right: 1px solid var(--lcd-rule);
+}
+:root[data-theme="industrial"]:not(#_) .index li:last-child {
+  border-right: 0;
+}
+:root[data-theme="industrial"]:not(#_) .index a {
+  padding: 4px 14px;
+}
+:root[data-theme="industrial"]:not(#_) .index a:hover {
+  padding-left: 14px;
+  background: transparent;
+}
+:root[data-theme="industrial"]:not(#_) .index .k {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--lcd-cap);
+}
+:root[data-theme="industrial"]:not(#_) .index .n {
+  font-family: var(--font-dot);
+  font-weight: 800;
+  font-size: 40px;
+  color: var(--lcd-ink);
+}
+:root[data-theme="industrial"]:not(#_) .index .n small {
+  color: var(--lcd-dim);
+}
+:root[data-theme="industrial"]:not(#_) .index .dot {
+  display: none;
+}
+
+/* Modules: orange index, dot-matrix figures. */
+:root[data-theme="industrial"]:not(#_) section.card header .num {
+  color: var(--accent);
+}
+:root[data-theme="industrial"]:not(#_) section.card header .num::before {
+  display: none;
+}
+:root[data-theme="industrial"]:not(#_) section.card header .glyph {
+  display: none;
+}
+:root[data-theme="industrial"]:not(#_) section.card h2 {
+  text-transform: none;
+  color: var(--ink);
+}
+:root[data-theme="industrial"]:not(#_) section.card .figure {
+  color: var(--accent);
+}
+/* Checks: square wells. */
+:root[data-theme="industrial"]:not(#_) .check {
+  width: 18px;
+  height: 18px;
+  border: 0;
+  border-radius: 5px;
+  background: var(--well);
+  box-shadow: inset 0 1px 2px var(--sh);
+}
+:root[data-theme="industrial"]:not(#_) .check.urgent {
+  box-shadow: inset 0 0 0 1.5px var(--danger), inset 0 1px 2px var(--sh);
+}
+:root[data-theme="industrial"]:not(#_) li.checked .check {
+  background: var(--accent);
+  color: #fff;
+}
+/* Home readouts: LCD cells. */
+:root[data-theme="industrial"]:not(#_) li.cell {
+  background: var(--lcd);
+  border: 0;
+  border-radius: 8px;
+  box-shadow: var(--lcd-shadow);
+}
+:root[data-theme="industrial"]:not(#_) li.cell .value,
+:root[data-theme="industrial"]:not(#_) li.cell.active .value {
+  color: var(--lcd-ink);
+}
+:root[data-theme="industrial"]:not(#_) li.cell .name,
+:root[data-theme="industrial"]:not(#_) li.cell .icon {
+  color: var(--lcd-cap);
+}
+
+/* Keys: raised, pressed on click; the LED glows. */
+:root[data-theme="industrial"]:not(#_) .btn.primary,
+:root[data-theme="industrial"]:not(#_) .send,
+:root[data-theme="industrial"]:not(#_) .tile {
+  box-shadow: inset 0 1px 0 var(--hi), 0 3px 0 var(--line), 0 6px 10px -6px var(--sh);
+  transition: transform 120ms var(--ease-out), box-shadow 120ms var(--ease-out), background-color 160ms ease;
+}
+:root[data-theme="industrial"]:not(#_) .btn.primary,
+:root[data-theme="industrial"]:not(#_) .send {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 3px 0 var(--accent-deep);
+}
+:root[data-theme="industrial"]:not(#_) :is(.btn.primary, .send, .tile):active {
+  transform: translateY(2px);
+  box-shadow: inset 0 1px 0 var(--hi), 0 1px 0 var(--line);
+}
+:root[data-theme="industrial"]:not(#_) .tile {
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+}
+:root[data-theme="industrial"]:not(#_) .tile .glyph {
+  border-radius: 7px;
+  border: 0;
+  background: var(--well);
+  box-shadow: inset 0 1px 2px var(--sh);
+  color: var(--ink);
+}
+:root[data-theme="industrial"]:not(#_) .dot {
+  box-shadow: 0 0 6px var(--ok);
+}
+:root[data-theme="industrial"]:not(#_) .dot.down {
+  box-shadow: 0 0 6px var(--danger);
+}

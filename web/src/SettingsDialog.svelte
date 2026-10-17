@@ -356,6 +356,12 @@
   .swatch[data-swatch="future"] i:nth-child(1) { background: #f1f0f5; border: 1px solid #ffffff; border-radius: 6px; }
   .swatch[data-swatch="future"] i:nth-child(2) { background: #5b3dff; border-radius: 6px; }
   .swatch[data-swatch="future"] i:nth-child(3) { background: #d4ff3a; border-radius: 6px; }
+  .swatch[data-swatch="tech"] i:nth-child(1) { background: #0f1420; border: 1px solid #283145; border-radius: 5px; }
+  .swatch[data-swatch="tech"] i:nth-child(2) { background: #161c2b; border: 1px solid #283145; border-radius: 5px; }
+  .swatch[data-swatch="tech"] i:nth-child(3) { background: #3d7bff; border-radius: 5px; }
+  .swatch[data-swatch="industrial"] i:nth-child(1) { background: #e9e7e1; border: 1px solid #c9c6be; border-radius: 5px; }
+  .swatch[data-swatch="industrial"] i:nth-child(2) { background: #1d1e1a; border-radius: 5px; }
+  .swatch[data-swatch="industrial"] i:nth-child(3) { background: #ff5a1f; border-radius: 5px; }
   .swatch[data-swatch="swiss"] i:nth-child(1) { background: #f6f6f3; border: 1.5px solid #0d0d0c; }
   .swatch[data-swatch="swiss"] i:nth-child(2) { background: #0d0d0c; }
   .swatch[data-swatch="swiss"] i:nth-child(3) { background: #1f3fd6; }
