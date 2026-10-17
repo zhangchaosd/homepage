@@ -61,7 +61,7 @@ systemctl --user enable --now ~/homepage/homepage.service
 curl -s --retry 5 --retry-connrefused http://127.0.0.1:8780/healthz
 ```
 
-`hash-password` 会提示输入两次登录密码，`secrets.toml` 里先只有密码哈希。在编辑器里改好 `config.toml` 中各服务的地址，并参照 `examples/config/secrets.toml.example` 往 `secrets.toml` 加上 token；`check-config` 通过后再启动服务。Linux 版需要 glibc 2.39 或更新（Ubuntu 24.04+、Debian 13+）。
+`hash-password` 会提示输入两次登录密码，`secrets.toml` 里先只有密码哈希。在编辑器里改好 `config.toml` 中各服务的地址，并参照 `examples/config/secrets.toml.example` 往 `secrets.toml` 加上 token；`check-config` 通过后再启动服务。Linux 版只依赖 glibc 2.28（v0.1.5 起；更早的版本需要 2.39，即 Ubuntu 24.04+、Debian 13+）。
 
 修改配置：编辑 `~/homepage/config.toml` 或 `secrets.toml`，然后执行 `systemctl --user restart homepage`。
 日志：`~/homepage/homepage.log`。以后升级在页面右上角一键完成（见[更新](#更新)），不需要重复这些步骤。如需开机后无需登录即自动运行，执行 `loginctl enable-linger`
@@ -144,11 +144,16 @@ trusted_proxies = ["192.168.1.2/32"]   # 网关机的局域网地址
 
 ## 更新
 
-**发版**（在开发机上）：改 `Cargo.toml` 的 `version`，提交后打同名 tag 推送即可，GitHub Actions 会构建四个平台并发布 Release。文件名不带版本号（如 `homepage-linux-x86_64.tar.gz`），所以安装命令里的 `latest/download` 链接始终指向最新版。tag 必须和 `Cargo.toml` 版本一致，否则工作流会失败（更新器会校验新二进制报告的版本号）。带 `-` 的 tag（如 `v0.2.0-beta.1`）发布为预发布版。
+**发版**（在 Apple Silicon Mac 上本地完成，不使用 GitHub Actions）：改 `Cargo.toml` 和 `web/package.json` 的 `version` 并提交，然后：
 
 ```bash
-git commit -am "Release v0.2.0" && git tag v0.2.0 && git push origin main v0.2.0
+SMOKE_HOST=zc@192.168.200.100 scripts/release.sh            # 演练：检查、构建四个平台、冒烟测试、打包
+SMOKE_HOST=zc@192.168.200.100 scripts/release.sh --publish  # 打 tag、推送、创建 GitHub Release 并核对校验和
 ```
+
+脚本依次运行前端检查与构建、fmt/clippy/测试，原生构建 macOS arm64、交叉构建 macOS x86_64，用 cargo-zigbuild 构建 Linux x86_64/aarch64（只依赖 glibc 2.28，Debian 12、Ubuntu 22.04 也能运行），打包到 `target/release-X.Y.Z/`，在本机和 `SMOKE_HOST`（可选的 x86_64 Linux 机器，测试在临时目录里进行，不影响已安装的服务）上冒烟测试。需要 Zig 0.14.1（默认 `~/.local/zig-0.14.1`，可用 `ZIG_HOME` 指定）、cargo-zigbuild 和登录好的 `gh`。
+
+文件名不带版本号（如 `homepage-linux-x86_64.tar.gz`），所以安装命令里的 `latest/download` 链接始终指向最新版；更新器会校验新程序报告的版本号。带 `-` 的版本（如 `0.2.0-beta.1`）发布为预发布版。
 
 **升级**（在主页上）：右上角齿轮按钮出现版本号时，点开"版本与更新"→"安装并重启"。服务端会：
 
