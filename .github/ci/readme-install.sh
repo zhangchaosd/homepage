@@ -22,7 +22,7 @@ if [[ $mode == install ]]; then
   sed -i -E \
     -e "s#^curl -fsSL https://github\.com/.*[|] tar (.*)\$#tar \1 < '$package'#" \
     -e 's#\./homepage hash-password#echo "ci-test-password-123" | ./homepage hash-password#' \
-    -e 's#^[$][{]EDITOR:-vi[}] .*$#printf "\\n[tokens]\\nvikunja = \\"x\\"\\nbookmarkd = \\"x\\"\\nhomeassistant = \\"x\\"\\n" >> secrets.toml#' \
+    -e 's#^[$][{]EDITOR:-vi[}] .*$#printf "\\n[tokens]\\nvikunja = \\"x\\"\\nbookmarkd = \\"x\\"\\nhomeassistant = \\"x\\"\\ninbox = \\"x\\"\\n" >> secrets.toml#' \
     "$script"
   grep -q "^tar -xz --strip-components=1 < '$package'" "$script" || { echo "download line not found in README"; exit 1; }
   grep -q 'ci-test-password-123' "$script" || { echo "hash-password line not found in README"; exit 1; }
