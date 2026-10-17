@@ -1,6 +1,7 @@
 <script lang="ts">
   import Icon from "../lib/Icon.svelte";
-  import { sendToInbox, type InboxItem, type InboxStatus } from "../lib/api";
+  import InboxDialog from "./InboxDialog.svelte";
+  import { restoreInboxItem, sendToInbox, type InboxItem, type InboxStatus } from "../lib/api";
   import { ago } from "../lib/time";
   import { now } from "../lib/clock.svelte";
 
@@ -13,6 +14,37 @@
   let sent = $state(false);
   let sentTimer: ReturnType<typeof setTimeout> | undefined;
   let area: HTMLTextAreaElement | undefined = $state();
+
+  // The entry open in the sheet, and the last one moved to the trash (for undo).
+  let opened = $state<InboxItem | null>(null);
+  let trashed = $state<{ id: string; version: number; title: string } | null>(null);
+  let undoing = $state(false);
+  let trashTimer: ReturnType<typeof setTimeout> | undefined;
+  const recent = $derived(status?.recent?.filter((item) => item.id !== trashed?.id) ?? null);
+
+  function onTrashed(id: string, version: number, title: string) {
+    trashed = { id, version, title };
+    error = "";
+    sent = false;
+    setTimeout(() => onsent?.(), 700);
+    clearTimeout(trashTimer);
+    trashTimer = setTimeout(() => (trashed = null), 12000);
+  }
+
+  async function undo() {
+    if (!trashed || undoing) return;
+    undoing = true;
+    try {
+      await restoreInboxItem(trashed.id, trashed.version);
+      trashed = null;
+      setTimeout(() => onsent?.(), 500);
+    } catch (cause) {
+      error = cause instanceof Error ? cause.message : "撤销失败";
+      trashed = null;
+    } finally {
+      undoing = false;
+    }
+  }
 
   const kindIcon: Record<InboxItem["kind"], string> = { text: "text", link: "globe", image: "image", file: "file", mixed: "inbox" };
 
@@ -81,8 +113,21 @@
   </div>
 </form>
 
+{#if opened}
+  <InboxDialog
+    item={opened}
+    {link}
+    canManage={!!status?.canManage}
+    onclose={() => (opened = null)}
+    onchanged={() => setTimeout(() => onsent?.(), 500)}
+    ontrashed={onTrashed}
+  />
+{/if}
+
 <p class="status" role="status" aria-live="polite">
-  {#if error}
+  {#if trashed}
+    <span class="trashed">已移入回收站：<span class="what">{trashed.title}</span><button class="link undo" onclick={undo} disabled={undoing}>{undoing ? "撤销中…" : "撤销"}</button></span>
+  {:else if error}
     <span class="error">{error}</span>
   {:else if sent}
     <span class="ok"><Icon name="check" size={12} stroke={2.4} />已投递{#if link}<a class="link" href={link} target="_blank" rel="noopener noreferrer">打开收件箱</a>{/if}</span>
@@ -93,17 +138,17 @@
   {/if}
 </p>
 
-{#if status?.recent}
+{#if recent}
   <section class="recent" aria-label="最近收件">
     <h3 class="label">最近收件</h3>
-    {#if status.recent.length === 0}
+    {#if recent.length === 0}
       <p class="empty">收件箱是空的</p>
     {:else}
       <ul>
-        {#each status.recent as item (item.id)}
+        {#each recent as item (item.id)}
           {@const soon = expiringIn(item)}
           <li>
-            <a class="item" href={link} target="_blank" rel="noopener noreferrer">
+            <button class="item" onclick={() => (opened = item)} aria-haspopup="dialog">
               <span class="kind"><Icon name={kindIcon[item.kind] ?? "inbox"} size={13} /></span>
               <span class="text">
                 <span class="item-title">{item.title || item.summary || "（无标题）"}</span>
@@ -115,7 +160,7 @@
                   {#if item.source}<span class="source">{item.source}</span>{/if}
                 </span>
               </span>
-            </a>
+            </button>
           </li>
         {/each}
       </ul>
@@ -249,6 +294,25 @@
   .warn {
     color: var(--warn);
   }
+  .trashed {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 2px;
+    max-width: 100%;
+    color: var(--muted);
+  }
+  .trashed .what {
+    max-width: 16em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--ink-2);
+  }
+  .undo {
+    margin-left: 10px;
+    color: var(--accent-ink, var(--accent));
+    font-weight: 550;
+  }
   .error {
     color: var(--danger);
   }
@@ -274,7 +338,9 @@
     display: flex;
     align-items: flex-start;
     gap: 10px;
+    width: 100%;
     padding: 8px 0;
+    text-align: left;
     transition: padding-left 220ms var(--ease-out), color 160ms ease;
   }
   @media (hover: hover) and (pointer: fine) {

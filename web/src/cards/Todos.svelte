@@ -1,5 +1,6 @@
 <script lang="ts">
   import Icon from "../lib/Icon.svelte";
+  import TodoDialog from "./TodoDialog.svelte";
   import { completeTodo, type Task, type Todos } from "../lib/api";
   import { dayDiff, dueLabel } from "../lib/time";
   import { now } from "../lib/clock.svelte";
@@ -10,6 +11,7 @@
   let pending = $state<Record<number, boolean>>({});
   let done = $state<Record<number, boolean>>({});
   let failed = $state<string>("");
+  let adding = $state(false);
 
   const groups = $derived.by(() => {
     const today = new Date(now.value);
@@ -57,10 +59,18 @@
   }
 </script>
 
-<p class="summary">
+{#if adding}
+  <!-- The server refreshes Vikunja right after a create; pick that up shortly. -->
+  <TodoDialog onclose={() => (adding = false)} oncreated={() => setTimeout(onchange, 700)} />
+{/if}
+
+<div class="summary">
   <span class="figure n tnum">{todayCount}</span>
   <span class="caption">{todayCount === 0 ? "今天没有待办，享受一下" : "项待办需要今天处理"}</span>
-</p>
+  <button class="add btn pressable" onclick={() => (adding = true)} aria-label="添加待办">
+    <Icon name="plus" size={13} stroke={2.2} /><span>添加</span>
+  </button>
+</div>
 
 {#if groups.length === 0}
   <div class="clear"><Icon name="check" size={16} stroke={2.2} /><span>全部完成</span></div>
@@ -107,6 +117,12 @@
     align-items: baseline;
     gap: 12px;
     margin: 0 0 16px;
+  }
+  .add {
+    align-self: center;
+    margin-left: auto;
+    height: 30px;
+    padding: 0 12px;
   }
   .n {
     font-size: 64px;

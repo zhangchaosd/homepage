@@ -444,3 +444,58 @@ button {
     transition-property: opacity, color, background-color, border-color !important;
   }
 }
+
+/* Buttons for sheets and forms: an outlined default, a filled primary. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: 34px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--btn-radius);
+  background: transparent;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 550;
+  white-space: nowrap;
+  transition:
+    transform 160ms var(--ease-out),
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
+}
+.btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover:not(:disabled) {
+    background: var(--surface-hover);
+  }
+  .btn.primary:hover:not(:disabled) {
+    background: var(--btn-bg);
+    filter: brightness(1.08);
+  }
+  .btn.danger:hover:not(:disabled) {
+    background: var(--danger-soft);
+  }
+}
+.btn.primary {
+  border-color: var(--btn-bg);
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+}
+.btn.danger {
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 45%, transparent);
+}
+.btn:disabled {
+  cursor: default;
+  background: transparent;
+  color: var(--faint);
+  border-color: var(--hair);
+}
+:root[data-theme="swiss"] .btn {
+  border-width: 1.5px;
+}

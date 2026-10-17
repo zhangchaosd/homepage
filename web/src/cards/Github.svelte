@@ -49,7 +49,7 @@
       <div><dd class="figure tnum">{compact.format(data.user.followers)}</dd><dt class="label">关注者</dt></div>
       <div><dd class="figure tnum">{compact.format(data.user.following)}</dd><dt class="label">关注</dt></div>
       {#if data.contributions}
-        <div><dd class="figure tnum">{compact.format(data.contributions.total)}</dd><dt class="label">今年贡献</dt></div>
+        <div><dd class="figure tnum">{compact.format(data.contributions.total)}</dd><dt class="label">一年贡献</dt></div>
       {/if}
     </dl>
   </div>
@@ -74,7 +74,7 @@
 
 {#if data.contributions}
   <div class="calendar">
-    <Heatmap {counts} maxWeeks={53} end={new Date(now.value)} label="GitHub 过去一年贡献热力图" />
+    <Heatmap {counts} maxWeeks={53} end={new Date(now.value)} label="GitHub 过去一年贡献热力图" green fill />
   </div>
 {/if}
 

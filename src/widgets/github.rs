@@ -1,5 +1,6 @@
-//! Public GitHub profile, recently pushed repositories and, with a token, the
-//! contribution calendar. The avatar is inlined as a data URI so the browser
+//! Public GitHub profile, recently pushed repositories and the contribution
+//! calendar: from GraphQL with a token, otherwise from the public calendar that
+//! GitHub renders on profile pages. The avatar is inlined as a data URI so the browser
 //! never talks to GitHub and the CSP can stay `img-src 'self' data:`.
 
 use base64::{Engine, engine::general_purpose::STANDARD};
@@ -96,9 +97,10 @@ pub async fn fetch(client: &reqwest::Client, config: &Github) -> FetchResult {
         .collect();
 
     let avatar = inline_avatar(client, &user.avatar_url).await;
+    // The calendar is a nice extra; the card still renders without it.
     let contributions = match &config.token {
         Some(token) => contributions(client, token, &config.username).await.ok(),
-        None => None,
+        None => public_contributions(client, &config.username).await.ok(),
     };
     Ok(serde_json::json!({
         "user": {
@@ -165,4 +167,90 @@ async fn contributions(
         .map(|day| serde_json::json!([day["date"], day["contributionCount"]]))
         .collect();
     Ok(serde_json::json!({ "total": calendar["totalContributions"], "days": days }))
+}
+
+/// The calendar fragment behind github.com profiles: one cell per day carrying
+/// `data-date` and an id, and a tooltip per cell ("3 contributions on …" or
+/// "No contributions on …").
+async fn public_contributions(client: &reqwest::Client, login: &str) -> Result<Value, String> {
+    let response = client
+        .get(format!("https://github.com/users/{login}/contributions"))
+        .send()
+        .await
+        .map_err(|error| super::describe("github calendar", &error))?;
+    if !response.status().is_success() {
+        return Err(format!(
+            "github calendar：HTTP {}",
+            response.status().as_u16()
+        ));
+    }
+    let html = response
+        .text()
+        .await
+        .map_err(|error| super::describe("github calendar", &error))?;
+    parse_calendar(&html).ok_or_else(|| "github calendar：页面格式已变化".into())
+}
+
+fn parse_calendar(html: &str) -> Option<Value> {
+    // Text of `name="…"` inside one tag.
+    fn attribute<'a>(tag: &'a str, name: &str) -> Option<&'a str> {
+        let start = tag.find(&format!(" {name}=\""))? + name.len() + 3;
+        tag[start..].split('"').next()
+    }
+    let mut cells: Vec<(&str, &str)> = Vec::new();
+    for (at, _) in html.match_indices("<td ") {
+        let tag = &html[at..at + html[at..].find('>')?];
+        if let (Some(date), Some(id)) = (attribute(tag, "data-date"), attribute(tag, "id")) {
+            cells.push((id, date));
+        }
+    }
+    let mut counts = std::collections::HashMap::new();
+    for (at, _) in html.match_indices("<tool-tip ") {
+        let rest = &html[at..];
+        let close = rest.find('>')?;
+        let Some(cell) = attribute(&rest[..close], "for") else {
+            continue;
+        };
+        let text = &rest[close + 1..rest.find("</tool-tip>")?];
+        // "No contributions …" has no leading number.
+        let count = text
+            .split_whitespace()
+            .next()
+            .and_then(|word| word.replace(',', "").parse::<i64>().ok())
+            .unwrap_or(0);
+        counts.insert(cell, count);
+    }
+    if cells.is_empty() {
+        return None;
+    }
+    let mut days: Vec<(&str, i64)> = cells
+        .into_iter()
+        .map(|(id, date)| (date, counts.get(id).copied().unwrap_or(0)))
+        .collect();
+    days.sort_unstable();
+    let total: i64 = days.iter().map(|(_, count)| count).sum();
+    Some(serde_json::json!({ "total": total, "days": days }))
+}
+
+#[cfg(test)]
+#[allow(clippy::unwrap_used)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn reads_the_public_calendar() {
+        let html = r#"<table><tr>
+            <td tabindex="0" data-ix="0" aria-selected="false" data-date="2026-10-12" id="contribution-day-component-0-0" data-level="0" class="ContributionCalendar-day"></td>
+            <td data-date="2026-10-11" id="contribution-day-component-6-52" data-level="2" class="ContributionCalendar-day"></td>
+            <td class="ContributionCalendar-label">Mon</td></tr></table>
+            <tool-tip id="t1" for="contribution-day-component-0-0" popover="manual">No contributions on October 12th.</tool-tip>
+            <tool-tip id="t2" for="contribution-day-component-6-52" popover="manual">1,204 contributions on October 11th.</tool-tip>"#;
+        let calendar = parse_calendar(html).unwrap();
+        assert_eq!(calendar["total"], 1204);
+        assert_eq!(
+            calendar["days"],
+            serde_json::json!([["2026-10-11", 1204], ["2026-10-12", 0]])
+        );
+        assert!(parse_calendar("<html>login wall</html>").is_none());
+    }
 }

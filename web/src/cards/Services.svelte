@@ -50,6 +50,11 @@
     );
   });
 
+  // One column grid for every group, so every tile has the same width: a lone
+  // tile stays tile-sized instead of stretching across the row.
+  let width = $state(0);
+  const cols = $derived(width >= 1100 ? 6 : width >= 880 ? 5 : width >= 660 ? 4 : width >= 440 ? 3 : 2);
+
   const groups = $derived.by(() => {
     const map = new Map<string, Service[]>();
     for (const service of visible) {
@@ -63,10 +68,10 @@
 {#if visible.length === 0}
   <p class="empty">没有匹配的服务</p>
 {:else}
-  <div class="groups">
+  <div class="groups" bind:clientWidth={width} style:--cols={cols}>
     {#each groups as [group, items] (group)}
-      <!-- Groups share a row, each taking width in proportion to its size. -->
-      <section class="group" style:--n={items.length}>
+      <!-- Groups share rows when they fit; a group spans as many columns as it has tiles. -->
+      <section class="group" style:--span={Math.min(items.length, cols)}>
         {#if group && groups.length > 1}
           <h3 class="label">{group}</h3>
         {/if}
@@ -108,13 +113,18 @@
 {/if}
 
 <style>
+  /* Groups and the tiles inside them share one set of column tracks; the
+     column gap equals the tile gap so every tile comes out the same width. */
   .groups {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 18px 32px;
+    display: grid;
+    grid-template-columns: repeat(var(--cols, 6), minmax(0, 1fr));
+    gap: 18px var(--tile-gap);
   }
   .group {
-    flex: var(--n) 1 calc(var(--n) * 190px);
+    grid-column: span var(--span);
+    display: grid;
+    grid-template-rows: auto 1fr;
+    align-content: start;
     min-width: 0;
   }
   h3 {
@@ -122,22 +132,22 @@
   }
 
   /* A ruled table of tiles: 1px of the grid colour shows between cells. */
+  /* Ruled cells: each tile draws its own hairline, so a short last row never
+     shows the grid colour through empty cells. */
   .grid {
     list-style: none;
     margin: 0;
     padding: 0;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(176px, 1fr));
+    grid-template-columns: repeat(var(--span), minmax(0, 1fr));
     gap: var(--tile-gap);
-    background: var(--tile-grid-bg);
-    border: 1px solid var(--tile-border);
+    align-content: start;
   }
-  :global(:root[data-theme="panel"]) .grid {
-    border: 0;
-    background: transparent;
+  .grid li {
+    outline: var(--tile-gap) solid var(--tile-grid-bg);
   }
-  :global(:root[data-theme="swiss"]) .grid {
-    border-width: 1.5px;
+  :global(:root[data-theme="panel"]) .grid li {
+    outline: 0;
   }
 
   .tile {
@@ -240,12 +250,6 @@
   }
 
   @media (max-width: 760px) {
-    .group {
-      flex-basis: 100%;
-    }
-    .grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
     .tile {
       gap: 9px;
       padding: 10px;

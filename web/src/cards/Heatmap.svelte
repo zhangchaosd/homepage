@@ -3,8 +3,14 @@
 
   /** Daily counts keyed by local date `YYYY-MM-DD`. Cells keep a fixed size; as many
    *  weeks as fit the available width are shown, up to `maxWeeks`. */
-  let { counts, maxWeeks = 26, end = new Date(), label }: { counts: Map<string, number>; maxWeeks?: number; end?: Date; label: string } =
-    $props();
+  let {
+    counts,
+    maxWeeks = 26,
+    end = new Date(),
+    label,
+    green = false,
+    fill = false,
+  }: { counts: Map<string, number>; maxWeeks?: number; end?: Date; label: string; green?: boolean; fill?: boolean } = $props();
 
   let available = $state(0);
 
@@ -53,7 +59,14 @@
 </script>
 
 <div class="fit" bind:clientWidth={available}>
-<svg viewBox="0 0 {width} {height}" width={width} height={height} class="heatmap" role="img" aria-label={label}>
+<!-- `fill` scales the whole calendar to the available width (cells up to about 1.6x). -->
+<svg
+  viewBox="0 0 {width} {height}"
+  width={fill ? "100%" : width}
+  height={fill ? undefined : height}
+  style:max-width={fill ? `${Math.round(width * 1.6)}px` : null}
+  class="heatmap"
+  class:green role="img" aria-label={label}>
   {#each grid.months as month (month.x)}
     <text x={month.x} y="9" class="month">{month.text}</text>
   {/each}
@@ -91,6 +104,13 @@
   }
   :global(:root[data-theme="swiss"]) rect {
     rx: 0;
+  }
+  /* GitHub's own greens, whatever the theme: the calendar reads as GitHub's. */
+  .green {
+    --heat-1: light-dark(#9be9a8, #0e4429);
+    --heat-2: light-dark(#40c463, #006d32);
+    --heat-3: light-dark(#30a14e, #26a641);
+    --heat-4: light-dark(#216e39, #39d353);
   }
   .l1 {
     fill: var(--heat-1);

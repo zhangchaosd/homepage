@@ -102,7 +102,28 @@ export type InboxItem = {
   attachments: number;
   source: string | null;
 };
-export type InboxStatus = { expiresAt: string | null; canSend: boolean; recent: InboxItem[] | null; link: string };
+export type InboxStatus = {
+  expiresAt: string | null;
+  canSend: boolean;
+  /** A read-write token from inboxd 0.4.0 on: items can be opened and managed here. */
+  canManage?: boolean;
+  recent: InboxItem[] | null;
+  link: string;
+};
+export type InboxAttachment = { id: string; name: string; mediaType: string; size: number; preview: boolean };
+export type InboxDetail = {
+  id: string;
+  title: string;
+  text: string;
+  links: { url: string; title?: string | null }[];
+  kind: InboxItem["kind"];
+  source: string | null;
+  createdAt: string;
+  pinned: boolean;
+  expiresAt: string | null;
+  version: number;
+  attachments: InboxAttachment[];
+};
 export type InboxReceipt = { item_id: string | null; status: string };
 
 export type Widgets = {
@@ -158,7 +179,9 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   const response = await fetch(path, { ...init, headers, credentials: "same-origin" });
   if (!response.ok) {
     const body = (await response.json().catch(() => ({}))) as { error?: string; message?: string };
-    throw new ApiError(response.status, body.error ?? "request_failed", body.message ?? response.statusText);
+    // Upstream failures carry a readable Chinese reason after a technical prefix.
+    const message = (body.message ?? response.statusText).replace(/^upstream service failed: /, "");
+    throw new ApiError(response.status, body.error ?? "request_failed", message);
   }
   if (response.status === 204 || response.status === 202) return undefined as T;
   return response.json() as Promise<T>;
@@ -213,6 +236,23 @@ export const sendToInbox = (text: string, title: string | null) =>
 
 export const refreshWidget = (key: string) => api<void>(`/api/v1/refresh/${key}`, { method: "POST" });
 export const completeTodo = (id: number) => api<void>(`/api/v1/todos/${id}/done`, { method: "POST" });
+
+export type TodoLabel = { id: number; title: string; hex_color: string };
+export type TodoOptions = { projects: { id: number; title: string }[]; labels: TodoLabel[]; defaultProject: number | null };
+export type NewTodo = { title: string; projectId: number | null; due: string | null; priority: number; labels: number[]; newLabels: string[] };
+export const getTodoOptions = () => api<TodoOptions>("/api/v1/todos/options");
+export const createTodo = (task: NewTodo) => api<{ id: number }>("/api/v1/todos", { method: "POST", body: JSON.stringify(task) });
+
+const inboxItem = (id: string) => `/api/v1/inbox/items/${encodeURIComponent(id)}`;
+export const getInboxItem = (id: string) => api<InboxDetail>(inboxItem(id));
+export const updateInboxItem = (id: string, version: number, change: { title?: string; pinned?: boolean }) =>
+  api<InboxDetail>(inboxItem(id), { method: "PATCH", body: JSON.stringify({ version, ...change }) });
+export const trashInboxItem = (id: string, version: number) =>
+  api<{ version: number }>(`${inboxItem(id)}/trash`, { method: "POST", body: JSON.stringify({ version }) });
+export const restoreInboxItem = (id: string, version: number) =>
+  api<{ version: number }>(`${inboxItem(id)}/restore`, { method: "POST", body: JSON.stringify({ version }) });
+export const inboxAttachmentUrl = (id: string, preview = false) =>
+  `/api/v1/inbox/attachments/${encodeURIComponent(id)}/${preview ? "preview" : "content"}`;
 
 export class PasskeyCancelled extends Error {}
 

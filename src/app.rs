@@ -123,11 +123,27 @@ pub fn router(state: AppState) -> Router {
         .route("/api/v1/auth/logout", post(api::logout))
         .route("/api/v1/dashboard", get(api::dashboard))
         .route("/api/v1/refresh/{widget}", post(api::refresh))
+        .route("/api/v1/todos", post(api::create_todo))
+        .route("/api/v1/todos/options", get(api::todo_options))
         .route("/api/v1/todos/{id}/done", post(api::complete_todo))
         // Inbox text can be up to 1 MiB; everything else keeps the small default.
         .route(
             "/api/v1/inbox",
             post(api::inbox_send).layer(DefaultBodyLimit::max(1100 * 1024)),
+        )
+        .route(
+            "/api/v1/inbox/items/{id}",
+            get(api::inbox_item).patch(api::inbox_update),
+        )
+        .route("/api/v1/inbox/items/{id}/trash", post(api::inbox_trash))
+        .route("/api/v1/inbox/items/{id}/restore", post(api::inbox_restore))
+        .route(
+            "/api/v1/inbox/attachments/{id}/content",
+            get(api::inbox_attachment),
+        )
+        .route(
+            "/api/v1/inbox/attachments/{id}/preview",
+            get(api::inbox_preview),
         )
         .route("/icons/{name}", get(api::icon))
         .route("/api/v1/update", get(api::update_status))

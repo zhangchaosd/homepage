@@ -2,14 +2,14 @@
 
 自托管服务的统一入口：一个单文件二进制 + 一个配置目录。
 
-- **服务启动台**：一键打开 Forgejo、Vikunja、bookmarkd、Obsidian Web Gateway、Home Assistant…，每个服务带在线状态（服务端探测局域网地址）
+- **服务启动台**（页面最底部，搜索时提到最前）：一键打开 Forgejo、Vikunja、bookmarkd、Obsidian Web Gateway、Home Assistant…，每个服务带在线状态（服务端探测局域网地址）
 - **局域网 IPv6**：通过各设备上的 [ipv6who](https://github.com/zhangchaosd/ipv6who) 显示当前全局 IPv6 地址，点击即可复制
-- **今日待办**：Vikunja 中已逾期、今天和未来几天的任务，可直接勾选完成
+- **今日待办**：Vikunja 中已逾期、今天和未来几天的任务，可直接勾选完成；「添加」可新建任务，选截止日期和时间、优先级、项目，选已有标签或新建标签
 - **最近提交**：Forgejo 动态里的提交 + 近半年贡献热力图
-- **GitHub**：资料、最近推送的仓库，配置 token 后显示贡献日历
+- **GitHub**：资料、最近推送的仓库和近一年贡献日历（GitHub 绿）。有 token 时走 GraphQL，没有时读取 GitHub 个人主页公开的贡献日历
 - **置顶书签**：bookmarkd 中置顶的书签（需要只读 token，见下文）
 - **家**：Home Assistant 中指定实体的状态
-- **收件箱**：在主页上直接投递文字和链接到 [跨设备收件箱](https://github.com/zhangchaosd/cross-device-inbox)（inboxd），正文中的网址自动识别为链接；令牌可读时同时显示最近收件
+- **收件箱**：在主页上直接投递文字和链接到 [跨设备收件箱](https://github.com/zhangchaosd/cross-device-inbox)（inboxd），正文中的网址自动识别为链接；令牌可读时同时显示最近收件；点开一条在弹窗里看全文、链接和附件（图片预览、下载），可改标题、置顶、移入回收站（可撤销）
 - `/` 或 `⌘K` 搜索服务和书签，回车打开第一个结果
 - **在线更新**：每天自动检查 GitHub Releases，右上角提示新版本，点"安装并重启"即可升级，无需重新部署
 - **三套主题**：晨报（衬线字、细线栏目、纸色与红墨）、控制台（等宽读数、指示灯、琥珀色面板）、工作台（粗黑标题、硬边框、色块与宝蓝），都有浅色和深色。服务器在 `[profile] theme` 里设默认，每台浏览器可在「设置 → 外观」里自己选
@@ -179,12 +179,12 @@ cd ~/homepage
 | 组件 | 需要 |
 |---|---|
 | 局域网 IPv6 | 每台设备运行 ipv6who，其 `allow` 包含 homepage 服务器地址。`[[devices]]` 只需要 `url`，设备名称（主机名）、系统和图标都来自 ipv6who 的返回；如设置了 `token`，在 secrets 里加 `ipv6who = "…"` 或给设备单独指定 `token = "<key>"` |
-| Vikunja | API token（tasks: read_all + update，projects: read_all）。勾选完成会写回 Vikunja |
+| Vikunja | API token（tasks: read_all + update + create，projects: read_all，labels: read_all + create，task labels: bulk）。勾选完成和添加任务会写回 Vikunja；新任务默认放进 Vikunja 账号设置里的默认项目 |
 | Forgejo | `username`；私有仓库需要 token |
-| GitHub | `username`；可选 token 用于贡献日历（GraphQL 需要认证） |
+| GitHub | `username`；可选 token（无需任何权限）用于 API 限额和 GraphQL 贡献日历，不配时贡献日历从公开页面读取 |
 | bookmarkd | v0.7.0+。在 bookmarkd 所在机器上运行 `bookmarkd token create homepage` 生成只读 token。`link` 必须是 bookmarkd 的 `public_url`：bookmarkd 只接受 Host 为该地址的请求，`url` 用局域网地址时主页会自动带上这个 Host |
 | Home Assistant | 长期访问令牌 + `entities` 列表 |
-| 收件箱（inboxd） | inboxd 0.3.1+：在收件箱「设置 → 令牌」里创建**读写**令牌（默认 100 年有效），写入 `secrets.toml` 的 `inbox`。读写令牌既能投递也能显示最近收件（`limit` 条，默认 6）；只写令牌只能投递。`url` 填局域网地址（inboxd 不校验 Host），`link` 填公开地址。令牌到期前 30 天卡片会提醒 |
+| 收件箱（inboxd） | inboxd 0.4.0+：在收件箱「设置 → 令牌」里创建**读写**令牌（默认 100 年有效），写入 `secrets.toml` 的 `inbox`。读写令牌能投递、显示最近收件（`limit` 条，默认 6），并在弹窗里查看和整理单条；0.4.0 之前创建的读写令牌只能看摘要，点开会提示换新令牌；只写令牌只能投递。`url` 填局域网地址（inboxd 不校验 Host），`link` 填公开地址。令牌到期前 30 天卡片会提醒 |
 
 不需要的组件删掉对应配置段即可，卡片会自动重新排版。
 

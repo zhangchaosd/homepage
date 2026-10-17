@@ -262,6 +262,44 @@ pub async fn complete_todo(
     Ok(StatusCode::NO_CONTENT)
 }
 
+fn vikunja_config(state: &AppState) -> AppResult<&crate::config::Vikunja> {
+    state
+        .hub
+        .config()
+        .vikunja
+        .as_ref()
+        .ok_or(AppError::NotFound)
+}
+
+/// Projects and labels for the add-task form, read live.
+pub async fn todo_options(State(state): State<AppState>) -> AppResult<Json<vikunja::Options>> {
+    let config = vikunja_config(&state)?;
+    Ok(Json(
+        vikunja::options(&state.hub.client, config)
+            .await
+            .map_err(AppError::Upstream)?,
+    ))
+}
+
+#[derive(Serialize)]
+pub struct CreatedTask {
+    id: i64,
+}
+
+pub async fn create_todo(
+    State(state): State<AppState>,
+    Json(task): Json<vikunja::NewTask>,
+) -> AppResult<Json<CreatedTask>> {
+    let config = vikunja_config(&state)?;
+    task.validate().map_err(AppError::InvalidRequest)?;
+    let result = vikunja::create(&state.hub.client, config, task).await;
+    // Even a half-done create (task without labels) should show up.
+    state.hub.wake(Widget::Vikunja);
+    Ok(Json(CreatedTask {
+        id: result.map_err(AppError::Upstream)?,
+    }))
+}
+
 #[derive(Deserialize)]
 pub struct InboxSendRequest {
     #[serde(default)]
@@ -291,6 +329,152 @@ pub async fn inbox_send(
     // The new entry should show up in the recent list right away.
     state.hub.wake(Widget::Inbox);
     Ok(Json(receipt))
+}
+
+fn inbox_config(state: &AppState) -> AppResult<&crate::config::Inbox> {
+    state.hub.config().inbox.as_ref().ok_or(AppError::NotFound)
+}
+
+fn item_id(id: &str) -> AppResult<()> {
+    if inbox::valid_id(id) {
+        Ok(())
+    } else {
+        Err(AppError::NotFound)
+    }
+}
+
+pub async fn inbox_item(
+    State(state): State<AppState>,
+    Path(id): Path<String>,
+) -> AppResult<Json<inbox::DetailView>> {
+    item_id(&id)?;
+    let config = inbox_config(&state)?;
+    Ok(Json(
+        inbox::item(&state.hub.client, config, &id)
+            .await
+            .map_err(AppError::Upstream)?,
+    ))
+}
+
+#[derive(Deserialize)]
+pub struct InboxUpdateRequest {
+    version: i64,
+    #[serde(default)]
+    title: Option<String>,
+    #[serde(default)]
+    pinned: Option<bool>,
+}
+
+pub async fn inbox_update(
+    State(state): State<AppState>,
+    Path(id): Path<String>,
+    Json(request): Json<InboxUpdateRequest>,
+) -> AppResult<Json<inbox::DetailView>> {
+    item_id(&id)?;
+    let config = inbox_config(&state)?;
+    let item = inbox::update(
+        &state.hub.client,
+        config,
+        &id,
+        request.version,
+        request.title.as_deref(),
+        request.pinned,
+    )
+    .await
+    .map_err(AppError::Upstream)?;
+    state.hub.wake(Widget::Inbox);
+    Ok(Json(item))
+}
+
+#[derive(Deserialize)]
+pub struct InboxVersion {
+    version: i64,
+}
+
+#[derive(Serialize)]
+pub struct VersionResponse {
+    version: i64,
+}
+
+async fn inbox_move(
+    state: AppState,
+    id: String,
+    version: i64,
+    restore: bool,
+) -> AppResult<Json<VersionResponse>> {
+    item_id(&id)?;
+    let config = inbox_config(&state)?;
+    let version = inbox::trash(&state.hub.client, config, &id, version, restore)
+        .await
+        .map_err(AppError::Upstream)?;
+    state.hub.wake(Widget::Inbox);
+    Ok(Json(VersionResponse { version }))
+}
+
+pub async fn inbox_trash(
+    State(state): State<AppState>,
+    Path(id): Path<String>,
+    Json(request): Json<InboxVersion>,
+) -> AppResult<Json<VersionResponse>> {
+    inbox_move(state, id, request.version, false).await
+}
+
+pub async fn inbox_restore(
+    State(state): State<AppState>,
+    Path(id): Path<String>,
+    Json(request): Json<InboxVersion>,
+) -> AppResult<Json<VersionResponse>> {
+    inbox_move(state, id, request.version, true).await
+}
+
+/// Streams an attachment from inboxd. Originals are always a download (never
+/// rendered here); previews are JPEGs inboxd derived, shown inline.
+async fn inbox_file(state: AppState, id: String, preview: bool) -> AppResult<Response> {
+    item_id(&id)?;
+    let config = inbox_config(&state)?;
+    let upstream = inbox::attachment(&state.hub.client, config, &id, preview)
+        .await
+        .map_err(AppError::Upstream)?;
+    let disposition = upstream
+        .headers()
+        .get(header::CONTENT_DISPOSITION)
+        .filter(|_| !preview)
+        .cloned()
+        .unwrap_or(HeaderValue::from_static("inline"));
+    let length = upstream.headers().get(header::CONTENT_LENGTH).cloned();
+    let mut response = axum::body::Body::from_stream(upstream.bytes_stream()).into_response();
+    let headers = response.headers_mut();
+    headers.insert(
+        header::CONTENT_TYPE,
+        HeaderValue::from_static(if preview {
+            "image/jpeg"
+        } else {
+            "application/octet-stream"
+        }),
+    );
+    headers.insert(header::CONTENT_DISPOSITION, disposition);
+    if let Some(length) = length {
+        headers.insert(header::CONTENT_LENGTH, length);
+    }
+    headers.insert(
+        header::CONTENT_SECURITY_POLICY,
+        HeaderValue::from_static("default-src 'none'; sandbox"),
+    );
+    Ok(response)
+}
+
+pub async fn inbox_attachment(
+    State(state): State<AppState>,
+    Path(id): Path<String>,
+) -> AppResult<Response> {
+    inbox_file(state, id, false).await
+}
+
+pub async fn inbox_preview(
+    State(state): State<AppState>,
+    Path(id): Path<String>,
+) -> AppResult<Response> {
+    inbox_file(state, id, true).await
 }
 
 /// Custom service icons from `<config>/icons/`. Names are restricted to a

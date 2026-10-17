@@ -9,6 +9,8 @@ responses under path prefixes; see dev/config/config.toml.
 
 import json
 import random
+import struct
+import zlib
 from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
@@ -81,14 +83,36 @@ HA = {
 
 
 INBOX = {"instance_id": "dfb5b8e8-9171-479e-aa8e-db2b23c13e02", "data_generation": "776aad66-abfe-4775-8405-4926568cfe47", "items": [
-    {"key": "seed-1", "item_id": "seed-1", "summary": {"title": "", "summary": "电梯里想到的：主页加一个收件箱卡片", "kind": "text", "created_at": iso(NOW - timedelta(minutes=35)),
+    {"key": "seed-1", "item_id": "5d0c3a0e-1111-4c1e-9a51-000000000001", "body": "电梯里想到的：主页加一个收件箱卡片，点开能看全文、置顶、改名、扔进回收站。\n\n顺便把待办也做成能直接添加。", "summary": {"title": "", "summary": "电梯里想到的：主页加一个收件箱卡片", "kind": "text", "created_at": iso(NOW - timedelta(minutes=35)),
      "pinned": True, "expires_at": None, "source": {"kind": "ios_share", "label": "iPhone"}, "attachment_count": 0}},
-    {"key": "seed-2", "item_id": "seed-2", "summary": {"title": "Caddy reverse_proxy 文档", "summary": "https://caddyserver.com/docs/caddyfile/directives/reverse_proxy", "kind": "link",
+    {"key": "seed-2", "item_id": "5d0c3a0e-2222-4c1e-9a51-000000000002", "body": "反向代理配置参考 https://caddyserver.com/docs/caddyfile/directives/reverse_proxy", "links": [{"url": "https://caddyserver.com/docs/caddyfile/directives/reverse_proxy", "title": "reverse_proxy (Caddyfile directive)"}], "summary": {"title": "Caddy reverse_proxy 文档", "summary": "https://caddyserver.com/docs/caddyfile/directives/reverse_proxy", "kind": "link",
      "created_at": iso(NOW - timedelta(hours=5)), "pinned": False, "expires_at": iso(NOW + timedelta(hours=9)), "source": {"kind": "web", "label": None}, "attachment_count": 0}},
-    {"key": "seed-3", "item_id": "seed-3", "summary": {"title": "发票扫描", "summary": "2 个附件", "kind": "image", "created_at": iso(NOW - timedelta(days=2)),
+    {"key": "seed-3", "item_id": "5d0c3a0e-3333-4c1e-9a51-000000000003", "body": "", "files": [("发票-十月.jpg", (196, 104, 63)), ("收据.jpg", (58, 116, 184))], "summary": {"title": "发票扫描", "summary": "2 个附件", "kind": "image", "created_at": iso(NOW - timedelta(days=2)),
      "pinned": False, "expires_at": iso(NOW + timedelta(days=5)), "source": {"kind": "ios_app", "label": "iPad"}, "attachment_count": 2}},
 ]}
 INBOX_TOKEN = "Bearer dev-inbox-token"
+LABELS = [{"id": 1, "title": "运维", "hex_color": "e8590c"}, {"id": 2, "title": "开发", "hex_color": "2f7f68"}, {"id": 3, "title": "家", "hex_color": "3a74b8"}]
+
+
+def png(rgb, w=160, h=120):
+    """A small gradient PNG standing in for an inboxd preview."""
+    rows = b"".join(b"\x00" + bytes(c for x in range(w) for c in (min(255, rgb[0] + x // 3), min(255, rgb[1] + y // 3), rgb[2])) for y in range(h))
+    chunk = lambda kind, data: struct.pack(">I", len(data)) + kind + data + struct.pack(">I", zlib.crc32(kind + data) & 0xFFFFFFFF)
+    return b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", struct.pack(">IIBBBBB", w, h, 8, 2, 0, 0, 0)) + chunk(b"IDAT", zlib.compress(rows)) + chunk(b"IEND", b"")
+
+
+def inbox_item(item_id):
+    return next((i for i in INBOX["items"] if i["item_id"] == item_id), None)
+
+
+def inbox_detail(item):
+    files = item.get("files") or []
+    return dict(item["summary"], id=item["item_id"], version=item.setdefault("version", 1), body_text=item.get("body") or item["summary"]["summary"],
+                links=item.get("links") or [], state=item.get("state", "active"), retention_mode="expires",
+                attachments=[{"id": "%sa%03d" % (item["item_id"][:-4], n), "item_id": item["item_id"], "ordinal": n, "original_filename": name,
+                              "declared_media_type": "image/jpeg", "detected_media_type": "image/jpeg", "source_uti": None,
+                              "byte_length": 182000 + n * 41000, "sha256": "0" * 64, "preview_status": "ready", "preview_byte_length": 9000}
+                             for n, (name, _) in enumerate(files)])
 
 
 def heatmap():
@@ -140,13 +164,38 @@ class Handler(BaseHTTPRequestHandler):
             if self.headers.get("authorization") != INBOX_TOKEN:
                 return self.send(401, {"error": {"code": "authentication_required"}})
             return self.send(200, {"authentication": "script", "grant_id": "g1", "expires_at": iso(NOW + timedelta(days=21)),
-                                   "scopes": ["ingest:write", "receipts:read_own", "items:read"], "max_ttl_seconds": 3153600000})
+                                   "scopes": ["ingest:write", "receipts:read_own", "items:read", "items:write", "items:trash"], "max_ttl_seconds": 3153600000})
         if path == "/inbox/api/v1/items":
             if self.headers.get("authorization") != INBOX_TOKEN:
                 return self.send(401, {"error": {"code": "authentication_required"}})
-            items = sorted((dict(i["summary"], id=i["item_id"], version=1, preview_attachment_id=None) for i in INBOX["items"]),
+            items = sorted((dict(i["summary"], id=i["item_id"], version=i.get("version", 1), preview_attachment_id=None) for i in INBOX["items"]
+                            if i.get("state", "active") == "active"),
                            key=lambda i: i["created_at"], reverse=True)
             return self.send(200, {"items": items[:6], "next_cursor": None})
+        if parts[:4] == ["inbox", "api", "v1", "items"] and len(parts) == 5:
+            if self.headers.get("authorization") != INBOX_TOKEN:
+                return self.send(401, {"error": {"code": "authentication_required"}})
+            item = inbox_item(parts[4])
+            if not item or item.get("state", "active") != "active":
+                return self.send(404, {"error": {"code": "not_found"}})
+            return self.send(200, inbox_detail(item))
+        if parts[:4] == ["inbox", "api", "v1", "attachments"] and len(parts) == 6:
+            owner = next((i for i in INBOX["items"] if i.get("files") and parts[4][:-4] == i["item_id"][:-4]), None)
+            if not owner:
+                return self.send(404, {"error": {"code": "not_found"}})
+            name, rgb = owner["files"][int(parts[4][-3:])]
+            data = png(rgb)
+            self.send_response(200)
+            self.send_header("content-type", "image/jpeg" if parts[5] == "preview" else "application/octet-stream")
+            if parts[5] == "content":
+                self.send_header("content-disposition", "attachment; filename*=UTF-8''" + __import__("urllib.parse").parse.quote(name))
+            self.send_header("content-length", str(len(data)))
+            self.end_headers()
+            return self.wfile.write(data)
+        if path == "/vikunja/api/v1/labels":
+            return self.send(200, LABELS)
+        if path == "/vikunja/api/v1/user":
+            return self.send(200, {"id": 1, "username": "chao", "settings": {"default_project_id": 4}})
         if path == "/vikunja/api/v1/tasks/all":
             # Vikunja 2.x removed this route; it now parses "all" as a task id.
             return self.send(400, {"code": 2004, "message": "Invalid model provided: Bad Request"})
@@ -209,12 +258,63 @@ class Handler(BaseHTTPRequestHandler):
                 print("inbox received:", json.dumps({k: body.get(k) for k in ("title", "body_text", "links", "source")}, ensure_ascii=False), flush=True)
             return self.send(201, {"receipt": {"client_submission_id": key, "item_id": existing["item_id"], "status": "committed",
                                                "committed_at": iso(NOW), "purged_at": None}})
+        parts = path.strip("/").split("/")
+        if parts[:4] == ["inbox", "api", "v1", "items"] and len(parts) == 6 and parts[5] in ("trash", "restore"):
+            item = inbox_item(parts[4])
+            if not item:
+                return self.send(404, {"error": {"code": "not_found"}})
+            if self.headers.get("if-match") != '"%d"' % item.get("version", 1):
+                return self.send(412, {"error": {"code": "revision_conflict"}})
+            item["state"] = "trash" if parts[5] == "trash" else "active"
+            item["version"] = item.get("version", 1) + 1
+            return self.send(200, inbox_detail(item))
+        if parts[-2:] == ["labels", "bulk"]:
+            task = next((t for t in TASKS if t["id"] == int(parts[-3])), None)
+            if not task:
+                return self.send(404, {})
+            task["labels"] = [dict((l for l in LABELS if l["id"] == x["id"]).__next__()) for x in body.get("labels", [])]
+            return self.send(201, body)
         if path.startswith("/vikunja/api/v1/tasks/"):
             task_id = int(path.rsplit("/", 1)[-1])
             if body.get("done") and body.get("title"):
                 TASKS[:] = [t for t in TASKS if t["id"] != task_id]
                 return self.send(200, body)
             return self.send(400, {"message": "full task required"})
+        return self.send(404, {})
+
+    def do_PUT(self):
+        path = self.path.split("?")[0]
+        parts = path.strip("/").split("/")
+        body = json.loads(self.rfile.read(int(self.headers.get("content-length") or 0)) or b"{}")
+        if path == "/vikunja/api/v1/labels":
+            label = {"id": max(l["id"] for l in LABELS) + 1, "title": body["title"], "hex_color": body.get("hex_color", "")}
+            LABELS.append(label)
+            return self.send(201, label)
+        if parts[:4] == ["vikunja", "api", "v1", "projects"] and parts[-1] == "tasks":
+            task = {"id": max(t["id"] for t in TASKS) + 1, "title": body["title"], "due_date": body.get("due_date") or "0001-01-01T00:00:00Z",
+                    "priority": body.get("priority", 0), "project_id": int(parts[4]), "labels": []}
+            TASKS.append(task)
+            print("vikunja task created:", json.dumps(body, ensure_ascii=False), flush=True)
+            return self.send(201, task)
+        return self.send(404, {})
+
+    def do_PATCH(self):
+        path = self.path.split("?")[0]
+        parts = path.strip("/").split("/")
+        body = json.loads(self.rfile.read(int(self.headers.get("content-length") or 0)) or b"{}")
+        if parts[:4] == ["inbox", "api", "v1", "items"] and len(parts) == 5:
+            item = inbox_item(parts[4])
+            if not item:
+                return self.send(404, {"error": {"code": "not_found"}})
+            if self.headers.get("if-match") != '"%d"' % item.get("version", 1):
+                return self.send(412, {"error": {"code": "revision_conflict"}})
+            if "retention" in body:
+                return self.send(403, {"error": {"code": "insufficient_scope"}})
+            for key in ("title", "pinned"):
+                if key in body:
+                    item["summary"][key] = body[key]
+            item["version"] = item.get("version", 1) + 1
+            return self.send(200, inbox_detail(item))
         return self.send(404, {})
 
 

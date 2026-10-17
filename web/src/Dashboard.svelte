@@ -102,7 +102,7 @@
 
   // Section numbers follow document order, skipping what is not configured.
   const order = $derived(
-    [dash.services.length > 0 && "services", ...row2, ...row3, w.github && "github"].filter(Boolean) as string[],
+    [...row2, ...row3, w.github && "github", dash.services.length > 0 && "services"].filter(Boolean) as string[],
   );
   const index = (key: string) => order.indexOf(key) + 1;
 
@@ -183,20 +183,25 @@
   </section>
 
   <main class="results">
-    {#if dash.services.length > 0}
-      <div class="row">
-        <div class="cell" style:--span="12">
-          <Card index={index("services")} title="服务" icon="box" slot={w.health} widget={w.health ? "health" : undefined} onrefreshed={reload}>
-            {#snippet actions()}
-              {#if health}
-                <span class="pill" class:warn={health.up < health.total}><i class="dot" class:down={health.up < health.total}></i>{health.up}/{health.total} 在线</span>
-              {/if}
-            {/snippet}
-            <Services services={dash.services} health={w.health} {query} />
-          </Card>
+    {#snippet services()}
+      {#if dash.services.length > 0}
+        <div class="row">
+          <div class="cell" style:--span="12">
+            <Card index={index("services")} title="服务" icon="box" slot={w.health} widget={w.health ? "health" : undefined} onrefreshed={reload}>
+              {#snippet actions()}
+                {#if health}
+                  <span class="pill" class:warn={health.up < health.total}><i class="dot" class:down={health.up < health.total}></i>{health.up}/{health.total} 在线</span>
+                {/if}
+              {/snippet}
+              <Services services={dash.services} health={w.health} {query} />
+            </Card>
+          </div>
         </div>
-      </div>
-    {/if}
+      {/if}
+    {/snippet}
+
+    <!-- Services close the page; while searching they come first, since the search filters them. -->
+    {#if query.trim()}{@render services()}{/if}
 
     {#if row2.length > 0}
       <div class="row">
@@ -255,6 +260,8 @@
         </div>
       </div>
     {/if}
+
+    {#if !query.trim()}{@render services()}{/if}
   </main>
 
   <footer class="foot label">
