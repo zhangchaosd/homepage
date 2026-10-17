@@ -6,7 +6,14 @@ const backend = process.env.HOMEPAGE_BACKEND ?? "http://127.0.0.1:8780";
 
 export default defineConfig({
   plugins: [svelte()],
-  build: { target: "es2022", assetsInlineLimit: 0 },
+  build: {
+    target: "es2022",
+    // Browsers with native light-dark(). Older targets make the minifier replace it
+    // with a prefers-color-scheme fallback, which ignores the 浅色/深色 choice
+    // (an inline color-scheme on <html>) and only ever follows the system.
+    cssTarget: ["chrome123", "edge123", "firefox120", "safari17.5"],
+    assetsInlineLimit: 0,
+  },
   server: {
     port: 5173,
     proxy: {
