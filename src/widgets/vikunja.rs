@@ -77,9 +77,12 @@ pub async fn fetch(client: &reqwest::Client, config: &Vikunja) -> FetchResult {
             "vikunja",
         )
     };
-    // Older releases list across projects at /tasks/all, newer ones at /tasks.
-    let tasks = match list("tasks/all").await {
-        Err(error) if error.ends_with("HTTP 404") => list("tasks").await?,
+    // Vikunja 2.x lists across projects at /tasks and answers /tasks/all with
+    // 400; releases before it only had /tasks/all.
+    let tasks = match list("tasks").await {
+        Err(error) if error.ends_with("HTTP 404") || error.ends_with("HTTP 405") => {
+            list("tasks/all").await?
+        }
         result => result?,
     };
     // Project names are nice to have; the list still renders without them.

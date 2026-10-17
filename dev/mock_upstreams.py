@@ -115,7 +115,10 @@ class Handler(BaseHTTPRequestHandler):
                            "deprecated": False} for a, t in device["extra"]]
             return self.send(200, {"address": device["address"], "interface": device["interface"], "type": device["type"],
                                    "addresses": addresses})
-        if path in ("/vikunja/api/v1/tasks/all", "/vikunja/api/v1/tasks"):
+        if path == "/vikunja/api/v1/tasks/all":
+            # Vikunja 2.x removed this route; it now parses "all" as a task id.
+            return self.send(400, {"code": 2004, "message": "Invalid model provided: Bad Request"})
+        if path == "/vikunja/api/v1/tasks":
             return self.send(200, [dict(t, done=False, identifier=f"#{t['id']}") for t in TASKS])
         if path == "/vikunja/api/v1/projects":
             return self.send(200, PROJECTS)
