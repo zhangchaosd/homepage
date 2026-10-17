@@ -1,0 +1,111 @@
+# Development configuration: every upstream points at dev/mock_upstreams.py,
+# except GitHub, which is real (public data, no token).
+
+[server]
+listen = "127.0.0.1:8780"
+public_url = "http://localhost:5173"
+
+[auth]
+username = "chao"
+
+[profile]
+name = "Chao"
+tagline = "所有自托管服务的统一入口。"
+title = "Chao · Home"
+
+[[services]]
+name = "Forgejo"
+url = "https://git.example.com"
+check = "http://127.0.0.1:8901/up"
+description = "代码托管"
+group = "开发"
+
+[[services]]
+name = "Vikunja"
+url = "https://todo.example.com"
+check = "http://127.0.0.1:8901/up"
+description = "待办与项目"
+group = "效率"
+
+[[services]]
+name = "bookmarkd"
+url = "https://bookmark.example.com"
+check = "http://127.0.0.1:8901/up"
+description = "私人书签"
+group = "效率"
+
+[[services]]
+name = "Obsidian"
+url = "https://notes.example.com"
+check = "http://127.0.0.1:8901/up"
+description = "笔记网关"
+group = "效率"
+
+[[services]]
+name = "Home Assistant"
+url = "http://homeassistant.local:8123"
+check = "http://127.0.0.1:8901/up"
+description = "仅局域网"
+group = "家"
+
+[[services]]
+name = "ipv6who"
+url = "http://127.0.0.1:8901/ipv6/nas/v1/ipv6"
+check = "http://127.0.0.1:8901/up"
+description = "IPv6 查询"
+group = "家"
+
+[[services]]
+name = "Router"
+url = "http://192.168.1.1"
+check = "http://127.0.0.1:1"
+description = "网关管理（离线示例）"
+group = "家"
+
+[[devices]]
+name = "NAS"
+kind = "nas"
+url = "http://127.0.0.1:8901/ipv6/nas"
+
+[[devices]]
+name = "Server"
+kind = "server"
+url = "http://127.0.0.1:8901/ipv6/server"
+
+[[devices]]
+name = "Desktop"
+kind = "desktop"
+url = "http://127.0.0.1:8901/ipv6/desktop"
+
+[[devices]]
+name = "Raspberry Pi"
+kind = "pi"
+url = "http://127.0.0.1:8901/ipv6/pi"
+
+[vikunja]
+url = "http://127.0.0.1:8901/vikunja"
+link = "https://todo.example.com"
+
+[forgejo]
+url = "http://127.0.0.1:8901/forgejo"
+link = "https://git.example.com"
+username = "chao"
+
+[github]
+username = "zhangchaosd"
+
+[bookmarkd]
+url = "http://127.0.0.1:8901/bookmarkd"
+link = "https://bookmark.example.com"
+
+[homeassistant]
+url = "http://127.0.0.1:8901/ha"
+link = "http://homeassistant.local:8123"
+entities = [
+  { id = "sensor.living_room_temperature" },
+  { id = "sensor.living_room_humidity" },
+  { id = "sensor.home_power" },
+  { id = "light.study" },
+  { id = "binary_sensor.front_door" },
+  { id = "person.chao", name = "我" },
+]

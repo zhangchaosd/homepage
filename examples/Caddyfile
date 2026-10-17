@@ -1,0 +1,5 @@
+# On the gateway machine. Replace 192.168.1.10 with the homepage server's LAN address.
+home.example.com {
+	encode zstd gzip
+	reverse_proxy 192.168.1.10:8780
+}

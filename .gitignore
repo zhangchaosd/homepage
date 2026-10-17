@@ -1,0 +1,7 @@
+/target
+/web/node_modules
+/web/dist
+/dev/config/secrets.toml
+/dev/config/state
+.DS_Store
+/.claude

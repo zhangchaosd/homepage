@@ -1,0 +1,117 @@
+# Homepage configuration. Everything here is non-secret; tokens and the password
+# hash live in secrets.toml next to this file. Paths are relative to this directory.
+
+[server]
+# Caddy runs on another machine, so listen on the LAN address and firewall the
+# port so only the gateway can reach it.
+listen = "0.0.0.0:8780"
+# The exact origin browsers use. Passkeys require it to be under the RP ID stored
+# in auth.db (e.g. home.example.com for RP ID example.com).
+public_url = "https://home.example.com"
+# The gateway's LAN address; only it may supply X-Forwarded-For (used for login rate limits).
+trusted_proxies = ["192.168.1.2/32"]
+
+[auth]
+# Required together with the password. Also shown as the passkey user name.
+username = "chao"
+# Passkey database copied from bookmarkd (see README). Omit to disable passkeys.
+passkey_db = "auth.db"
+
+[profile]
+name = "Chao"
+tagline = "所有自托管服务的统一入口。"
+title = "Chao · Home"
+
+# ----------------------------------------------------------------- services
+# url   — what the tile opens (public address)
+# check — what the server probes for the status dot (LAN address); "" disables
+# icon  — built-in name (forgejo, vikunja, homeassistant, obsidian, bookmarkd,
+#         github, server, nas, router, globe…) or a file in icons/ (e.g. "jellyfin.svg")
+
+[[services]]
+name = "Forgejo"
+url = "https://git.example.com"
+check = "http://192.168.1.10:3000"
+description = "代码托管"
+group = "开发"
+
+[[services]]
+name = "Vikunja"
+url = "https://todo.example.com"
+check = "http://192.168.1.10:3456"
+description = "待办与项目"
+group = "效率"
+
+[[services]]
+name = "bookmarkd"
+url = "https://bookmark.example.com"
+check = "http://192.168.1.10:8765/healthz"
+description = "私人书签"
+group = "效率"
+
+[[services]]
+name = "Obsidian"
+url = "https://notes.example.com"
+check = "http://192.168.1.10:8766/health"
+description = "笔记网关"
+group = "效率"
+
+[[services]]
+name = "Home Assistant"
+url = "http://192.168.1.20:8123"
+description = "仅局域网"
+group = "家"
+
+# ------------------------------------------------------------------ devices
+# Each device runs ipv6who. Its `allow` list must include this server's address.
+# kind: server, nas, desktop, laptop, router, phone, pi
+# token: key under [tokens] in secrets.toml (defaults to "ipv6who" when present)
+
+[[devices]]
+name = "NAS"
+kind = "nas"
+url = "http://192.168.1.10:8066"
+
+[[devices]]
+name = "Desktop"
+kind = "desktop"
+url = "http://192.168.1.30:8066"
+
+# ------------------------------------------------------------------ widgets
+# Remove a section to hide its card. `url` is the LAN API address, `link` the
+# public address used for links. `refresh` is in seconds.
+
+[vikunja]
+url = "http://192.168.1.10:3456"
+link = "https://todo.example.com"
+upcoming_days = 7
+# refresh = 60
+
+[forgejo]
+url = "http://192.168.1.10:3000"
+link = "https://git.example.com"
+username = "chao"
+limit = 8
+# refresh = 120
+
+[github]
+username = "zhangchaosd"
+limit = 6
+# refresh = 900
+
+[bookmarkd]
+url = "http://192.168.1.10:8765"
+link = "https://bookmark.example.com"
+limit = 12
+# refresh = 300
+
+[homeassistant]
+url = "http://192.168.1.20:8123"
+link = "http://192.168.1.20:8123"
+# refresh = 30
+entities = [
+  { id = "sensor.living_room_temperature", name = "客厅温度" },
+  { id = "sensor.living_room_humidity", name = "客厅湿度" },
+  { id = "light.study", name = "书房灯" },
+  { id = "person.chao", name = "我" },
+]
