@@ -9,6 +9,7 @@
   import Github from "./cards/Github.svelte";
   import Bookmarks from "./cards/Bookmarks.svelte";
   import Home from "./cards/Home.svelte";
+  import Inbox from "./cards/Inbox.svelte";
   import UpdateDialog from "./UpdateDialog.svelte";
   import { ApiError, getDashboard, getUpdate, logout, type Dashboard, type UpdateStatus } from "./lib/api";
   import { greeting } from "./lib/time";
@@ -94,7 +95,7 @@
 
   // Cards in a row share its width, so a missing integration never leaves a hole.
   const row2 = $derived([w.vikunja && "todo", w.devices && "devices", w.homeassistant && "home"].filter(Boolean) as string[]);
-  const row3 = $derived([w.forgejo && "commits", w.bookmarkd && "bookmarks"].filter(Boolean) as string[]);
+  const row3 = $derived([w.forgejo && "commits", w.bookmarkd && "bookmarks", w.inbox && "inbox"].filter(Boolean) as string[]);
   const span = (row: string[]) => 12 / Math.max(1, row.length);
 </script>
 
@@ -191,6 +192,16 @@
         {:else if key === "bookmarks" && w.bookmarkd}
           <Card title="置顶书签" icon="bookmark" slot={w.bookmarkd} widget="bookmarkd" link={dash.links.bookmarkd} onrefreshed={reload}>
             {#if w.bookmarkd.data}<Bookmarks items={w.bookmarkd.data.items} {query} />{/if}
+          </Card>
+        {:else if key === "inbox" && w.inbox}
+          <!-- Sending works even while the status check is failing, so the form is always shown. -->
+          <Card title="收件箱" icon="inbox" widget="inbox" link={dash.links.inbox} onrefreshed={reload}>
+            {#snippet actions()}
+              {#if w.inbox?.error}
+                <span class="pill warn" title={w.inbox.error}><i></i>状态未知</span>
+              {/if}
+            {/snippet}
+            <Inbox status={w.inbox.data} link={dash.links.inbox} />
           </Card>
         {/if}
       </div>

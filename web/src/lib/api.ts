@@ -86,6 +86,9 @@ export type HaEntity = {
 };
 export type HomeAssistant = { entities: HaEntity[]; link: string };
 
+export type InboxStatus = { expiresAt: string | null; canSend: boolean; link: string };
+export type InboxReceipt = { item_id: string | null; status: string };
+
 export type Widgets = {
   health?: Slot<Health>;
   devices?: Slot<Device[]>;
@@ -94,12 +97,13 @@ export type Widgets = {
   github?: Slot<Github>;
   bookmarkd?: Slot<Bookmarks>;
   homeassistant?: Slot<HomeAssistant>;
+  inbox?: Slot<InboxStatus>;
 };
 
 export type Dashboard = {
   profile: { name: string; tagline: string; title?: string | null };
   services: Service[];
-  links: Partial<Record<"vikunja" | "forgejo" | "github" | "bookmarkd" | "homeassistant", string>>;
+  links: Partial<Record<"vikunja" | "forgejo" | "github" | "bookmarkd" | "homeassistant" | "inbox", string>>;
   widgets: Widgets;
   serverTime: number;
 };
@@ -187,6 +191,9 @@ export const installUpdate = (version: string) =>
     method: "POST",
     body: JSON.stringify({ version }),
   });
+
+export const sendToInbox = (text: string, title: string | null) =>
+  api<InboxReceipt>("/api/v1/inbox", { method: "POST", body: JSON.stringify({ text, title }) });
 
 export const refreshWidget = (key: string) => api<void>(`/api/v1/refresh/${key}`, { method: "POST" });
 export const completeTodo = (id: number) => api<void>(`/api/v1/todos/${id}/done`, { method: "POST" });

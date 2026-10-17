@@ -56,6 +56,13 @@ description = "IPv6 查询"
 group = "家"
 
 [[services]]
+name = "收件箱"
+url = "https://inbox.example.com"
+check = "http://127.0.0.1:8901/inbox/health/ready"
+description = "跨设备收件箱"
+group = "效率"
+
+[[services]]
 name = "Router"
 url = "http://192.168.1.1"
 check = "http://127.0.0.1:1"
@@ -109,3 +116,7 @@ entities = [
   { id = "binary_sensor.front_door" },
   { id = "person.chao", name = "我" },
 ]
+
+[inbox]
+url = "http://127.0.0.1:8901/inbox"
+link = "https://inbox.example.com"

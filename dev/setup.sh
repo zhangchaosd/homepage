@@ -10,6 +10,7 @@ $hash
 vikunja = "dev-vikunja-token"
 bookmarkd = "dev-bookmarkd-token"
 homeassistant = "dev-ha-token"
+inbox = "dev-inbox-token"
 SECRETS
 chmod 600 dev/config/secrets.toml
 echo "wrote dev/config/secrets.toml (user: chao, password: homepage-dev-password)"

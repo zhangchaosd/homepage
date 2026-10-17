@@ -87,6 +87,7 @@ struct FileConfig {
     github: Option<GithubSection>,
     bookmarkd: Option<BookmarkdSection>,
     homeassistant: Option<HomeAssistantSection>,
+    inbox: Option<InboxSection>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -206,6 +207,17 @@ struct HomeAssistantSection {
     refresh: Option<u64>,
 }
 
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct InboxSection {
+    /// inboxd base URL, e.g. http://192.168.200.100:8766
+    url: String,
+    link: Option<String>,
+    /// Key in secrets.toml `[tokens]` holding a write-only script token; defaults to "inbox".
+    token: Option<String>,
+    refresh: Option<u64>,
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct HaEntity {
@@ -259,6 +271,7 @@ pub struct Config {
     pub github: Option<Github>,
     pub bookmarkd: Option<Bookmarkd>,
     pub homeassistant: Option<HomeAssistant>,
+    pub inbox: Option<Inbox>,
 }
 
 #[derive(Clone, Debug)]
@@ -311,6 +324,14 @@ pub struct HomeAssistant {
     pub link: String,
     pub token: String,
     pub entities: Vec<HaEntity>,
+    pub refresh: Duration,
+}
+
+#[derive(Clone, Debug)]
+pub struct Inbox {
+    pub url: String,
+    pub link: String,
+    pub token: String,
     pub refresh: Duration,
 }
 
@@ -477,6 +498,21 @@ impl Config {
             })
             .transpose()?;
 
+        let inbox = file
+            .inbox
+            .map(|section| -> AppResult<Inbox> {
+                let url = base_url(&section.url);
+                Ok(Inbox {
+                    token: required(section.token.as_deref(), "inbox")?,
+                    link: section
+                        .link
+                        .map_or_else(|| url.clone(), |link| base_url(&link)),
+                    url,
+                    refresh: refresh(section.refresh, 600),
+                })
+            })
+            .transpose()?;
+
         Ok(Self {
             dir: dir.to_path_buf(),
             state_dir: dir.join("state"),
@@ -498,6 +534,7 @@ impl Config {
             github,
             bookmarkd,
             homeassistant,
+            inbox,
         })
     }
 }

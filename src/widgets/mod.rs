@@ -9,6 +9,7 @@ mod forgejo;
 mod github;
 mod health;
 mod homeassistant;
+pub mod inbox;
 pub mod vikunja;
 
 use std::{collections::HashMap, sync::Arc, time::Duration};
@@ -29,6 +30,7 @@ pub enum Widget {
     Github,
     Bookmarkd,
     HomeAssistant,
+    Inbox,
 }
 
 impl Widget {
@@ -41,6 +43,7 @@ impl Widget {
             Self::Github => "github",
             Self::Bookmarkd => "bookmarkd",
             Self::HomeAssistant => "homeassistant",
+            Self::Inbox => "inbox",
         }
     }
 
@@ -53,6 +56,7 @@ impl Widget {
             Self::Github,
             Self::Bookmarkd,
             Self::HomeAssistant,
+            Self::Inbox,
         ]
         .into_iter()
         .find(|widget| widget.key() == key)
@@ -138,6 +142,9 @@ impl Hub {
         if let Some(section) = &config.homeassistant {
             widgets.push((Widget::HomeAssistant, section.refresh));
         }
+        if let Some(section) = &config.inbox {
+            widgets.push((Widget::Inbox, section.refresh));
+        }
         widgets
     }
 
@@ -184,6 +191,10 @@ impl Hub {
             },
             Widget::HomeAssistant => match &config.homeassistant {
                 Some(section) => homeassistant::fetch(&self.client, section).await,
+                None => return,
+            },
+            Widget::Inbox => match &config.inbox {
+                Some(section) => inbox::fetch(&self.client, section).await,
                 None => return,
             },
         };

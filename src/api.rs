@@ -14,7 +14,7 @@ use crate::{
     error::{AppError, AppResult},
     security::auth::{LoginResult, SESSION_COOKIE, cookie_value, random_token},
     update,
-    widgets::{Slot, Widget, vikunja},
+    widgets::{Slot, Widget, inbox, vikunja},
 };
 
 // ------------------------------------------------------------------- public
@@ -219,6 +219,9 @@ pub async fn dashboard(State(state): State<AppState>) -> Json<DashboardResponse>
     if let Some(section) = &config.homeassistant {
         links.insert("homeassistant", section.link.clone());
     }
+    if let Some(section) = &config.inbox {
+        links.insert("inbox", section.link.clone());
+    }
     Json(DashboardResponse {
         profile: config.profile.clone(),
         services: config.services.clone(),
@@ -255,6 +258,35 @@ pub async fn complete_todo(
         .map_err(AppError::Upstream)?;
     state.hub.wake(Widget::Vikunja);
     Ok(StatusCode::NO_CONTENT)
+}
+
+#[derive(Deserialize)]
+pub struct InboxSendRequest {
+    #[serde(default)]
+    title: Option<String>,
+    text: String,
+}
+
+/// Quick send to the cross-device inbox with its write-only token.
+pub async fn inbox_send(
+    State(state): State<AppState>,
+    Json(request): Json<InboxSendRequest>,
+) -> AppResult<Json<inbox::Receipt>> {
+    let config = state
+        .hub
+        .config()
+        .inbox
+        .as_ref()
+        .ok_or(AppError::NotFound)?;
+    let receipt = inbox::send(
+        &state.hub.client,
+        config,
+        request.title.as_deref(),
+        &request.text,
+    )
+    .await
+    .map_err(AppError::Upstream)?;
+    Ok(Json(receipt))
 }
 
 /// Custom service icons from `<config>/icons/`. Names are restricted to a

@@ -76,6 +76,10 @@ HA = {
 }
 
 
+INBOX = {"instance_id": "dfb5b8e8-9171-479e-aa8e-db2b23c13e02", "data_generation": "776aad66-abfe-4775-8405-4926568cfe47", "items": []}
+INBOX_TOKEN = "Bearer dev-inbox-token"
+
+
 def heatmap():
     random.seed(7)
     out = []
@@ -115,6 +119,15 @@ class Handler(BaseHTTPRequestHandler):
                            "deprecated": False} for a, t in device["extra"]]
             return self.send(200, {"address": device["address"], "interface": device["interface"], "type": device["type"],
                                    "addresses": addresses})
+        if path == "/inbox/health/ready":
+            return self.send(200, {"status": "ok"})
+        if path == "/inbox/api/v1/capabilities":
+            return self.send(200, {"api_version": 1, "instance_id": INBOX["instance_id"], "data_generation": INBOX["data_generation"]})
+        if path == "/inbox/api/v1/me":
+            if self.headers.get("authorization") != INBOX_TOKEN:
+                return self.send(401, {"error": {"code": "authentication_required"}})
+            return self.send(200, {"authentication": "script", "grant_id": "g1", "expires_at": iso(NOW + timedelta(days=21)),
+                                   "scopes": ["ingest:write", "receipts:read_own"], "max_ttl_seconds": 2592000})
         if path == "/vikunja/api/v1/tasks/all":
             # Vikunja 2.x removed this route; it now parses "all" as a task id.
             return self.send(400, {"code": 2004, "message": "Invalid model provided: Bad Request"})
@@ -155,6 +168,24 @@ class Handler(BaseHTTPRequestHandler):
         path = self.path.split("?")[0]
         length = int(self.headers.get("content-length") or 0)
         body = json.loads(self.rfile.read(length) or b"{}")
+        if path == "/inbox/api/v1/ingest":
+            # Mirrors inboxd's checks that matter to the homepage.
+            if self.headers.get("authorization") != INBOX_TOKEN:
+                return self.send(401, {"error": {"code": "authentication_required"}})
+            for name in ("instance_id", "data_generation"):
+                header = self.headers.get("x-inbox-" + name.replace("_", "-"))
+                if header is not None and header != INBOX[name]:
+                    return self.send(409, {"error": {"code": "destination_changed"}})
+            key = self.headers.get("idempotency-key")
+            if not key or body.get("client_submission_id") != key or body.get("schema_version") != 1:
+                return self.send(400, {"error": {"code": "invalid_request"}})
+            existing = next((i for i in INBOX["items"] if i["key"] == key), None)
+            if existing is None:
+                existing = {"key": key, "item_id": "%08x-0000-4000-8000-%012x" % (len(INBOX["items"]), len(INBOX["items"])), "manifest": body}
+                INBOX["items"].append(existing)
+                print("inbox received:", json.dumps({k: body.get(k) for k in ("title", "body_text", "links", "source")}, ensure_ascii=False), flush=True)
+            return self.send(201, {"receipt": {"client_submission_id": key, "item_id": existing["item_id"], "status": "committed",
+                                               "committed_at": iso(NOW), "purged_at": None}})
         if path.startswith("/vikunja/api/v1/tasks/"):
             task_id = int(path.rsplit("/", 1)[-1])
             if body.get("done") and body.get("title"):

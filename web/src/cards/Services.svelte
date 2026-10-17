@@ -19,6 +19,10 @@
     bookmarks: "bookmark",
     github: "github",
     ipv6who: "network",
+    inbox: "inbox",
+    inboxd: "inbox",
+    收件箱: "inbox",
+    "cross-device-inbox": "inbox",
   };
 
   function glyph(service: Service): { kind: "file" | "icon" | "letter"; value: string } {
