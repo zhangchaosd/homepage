@@ -1,9 +1,13 @@
-# bookmarkd read-only integration token (proposed contract)
+# bookmarkd read-only integration token
 
 The homepage shows pinned bookmarks by calling bookmarkd from the server side.
-bookmarkd currently only accepts a passkey browser session, so it needs a small
-addition: read-only bearer tokens for trusted integrations. This document is the
-contract the homepage already implements (`src/widgets/bookmarkd.rs`).
+bookmarkd v0.7.0 added read-only bearer tokens for trusted integrations; this is
+the contract the homepage relies on (`src/widgets/bookmarkd.rs`). Create a token
+on the bookmarkd host with `bookmarkd token create homepage`.
+
+bookmarkd rejects requests whose `Host` is not its `public_url` host. When the
+homepage reaches it at a LAN address, it sends the host from `[bookmarkd] link`,
+so `link` must be bookmarkd's public URL.
 
 ## Request
 

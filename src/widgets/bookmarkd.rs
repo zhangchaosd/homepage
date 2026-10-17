@@ -1,5 +1,9 @@
 //! Pinned bookmarks from bookmarkd, read with a read-only API token:
 //! `GET /api/v1/bookmarks?pinned=true` with `Authorization: Bearer <token>`.
+//!
+//! bookmarkd only answers requests whose `Host` is its public origin, so when
+//! the API is reached at a LAN address the public host from `link` is sent
+//! instead, just as the reverse proxy would.
 
 use serde::{Deserialize, Serialize};
 
@@ -36,14 +40,14 @@ struct BookmarkView {
 
 pub async fn fetch(client: &reqwest::Client, config: &Bookmarkd) -> FetchResult {
     let limit = config.limit.to_string();
-    let page: Page = get_json(
-        client
-            .get(format!("{}/api/v1/bookmarks", config.url))
-            .bearer_auth(&config.token)
-            .query(&[("pinned", "true"), ("limit", limit.as_str())]),
-        "bookmarkd",
-    )
-    .await?;
+    let mut request = client
+        .get(format!("{}/api/v1/bookmarks", config.url))
+        .bearer_auth(&config.token)
+        .query(&[("pinned", "true"), ("limit", limit.as_str())]);
+    if let Some(host) = public_host(&config.url, &config.link) {
+        request = request.header(reqwest::header::HOST, host);
+    }
+    let page: Page = get_json(request, "bookmarkd").await?;
     let mut items = page.items;
     items.sort_by_key(|bookmark| bookmark.pinned_position);
     let views: Vec<BookmarkView> = items
@@ -76,6 +80,20 @@ pub async fn fetch(client: &reqwest::Client, config: &Bookmarkd) -> FetchResult 
     Ok(serde_json::json!({ "items": views, "link": config.link }))
 }
 
+/// The `host[:port]` of `link` when it differs from the one in `url`.
+fn public_host(url: &str, link: &str) -> Option<String> {
+    let authority = |value: &str| {
+        let parsed = url::Url::parse(value).ok()?;
+        let host = parsed.host_str()?.to_owned();
+        Some(match parsed.port() {
+            Some(port) => format!("{host}:{port}"),
+            None => host,
+        })
+    };
+    let public = authority(link)?;
+    (authority(url)? != public).then_some(public)
+}
+
 /// Links are rendered as `<a href>`, so `javascript:` and friends are dropped.
 fn is_web_url(value: &str) -> bool {
     url::Url::parse(value).is_ok_and(|url| matches!(url.scheme(), "http" | "https"))
@@ -84,6 +102,25 @@ fn is_web_url(value: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn sends_the_public_host_for_lan_urls() {
+        assert_eq!(
+            public_host("http://192.168.1.10:8765", "https://bookmark.example.com").as_deref(),
+            Some("bookmark.example.com")
+        );
+        assert_eq!(
+            public_host("http://10.0.0.2:8765", "http://localhost:8765").as_deref(),
+            Some("localhost:8765")
+        );
+        assert_eq!(
+            public_host(
+                "https://bookmark.example.com",
+                "https://bookmark.example.com"
+            ),
+            None
+        );
+    }
 
     #[test]
     fn only_web_links_are_shown() {

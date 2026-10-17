@@ -175,7 +175,7 @@ cd ~/homepage
 | Vikunja | API token（tasks: read_all + update，projects: read_all）。勾选完成会写回 Vikunja |
 | Forgejo | `username`；私有仓库需要 token |
 | GitHub | `username`；可选 token 用于贡献日历（GraphQL 需要认证） |
-| bookmarkd | 只读集成 token —— **bookmarkd 目前还不支持**，接口约定见 [docs/bookmarkd-read-token.md](docs/bookmarkd-read-token.md) |
+| bookmarkd | v0.7.0+。在 bookmarkd 所在机器上运行 `bookmarkd token create homepage` 生成只读 token。`link` 必须是 bookmarkd 的 `public_url`：bookmarkd 只接受 Host 为该地址的请求，`url` 用局域网地址时主页会自动带上这个 Host |
 | Home Assistant | 长期访问令牌 + `entities` 列表 |
 
 不需要的组件删掉对应配置段即可，卡片会自动重新排版。
