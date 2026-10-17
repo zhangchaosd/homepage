@@ -14,8 +14,9 @@ trusted_proxies = ["192.168.1.2/32"]
 [auth]
 # Required together with the password. Also shown as the passkey user name.
 username = "chao"
-# Passkey database copied from bookmarkd (see README). Omit to disable passkeys.
-passkey_db = "auth.db"
+# Passkey database copied from bookmarkd (see README). Uncomment once auth.db
+# is in this directory; without it only the password login is offered.
+# passkey_db = "auth.db"
 
 [profile]
 name = "Chao"
