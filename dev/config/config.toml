@@ -70,23 +70,15 @@ description = "网关管理（离线示例）"
 group = "家"
 
 [[devices]]
-name = "NAS"
-kind = "nas"
 url = "http://127.0.0.1:8901/ipv6/nas"
 
 [[devices]]
-name = "Server"
-kind = "server"
 url = "http://127.0.0.1:8901/ipv6/server"
 
 [[devices]]
-name = "Desktop"
-kind = "desktop"
 url = "http://127.0.0.1:8901/ipv6/desktop"
 
 [[devices]]
-name = "Raspberry Pi"
-kind = "pi"
 url = "http://127.0.0.1:8901/ipv6/pi"
 
 [vikunja]

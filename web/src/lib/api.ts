@@ -14,8 +14,13 @@ export type Health = Record<string, { up: boolean; status: number | null; latenc
 
 export type DeviceAddress = { address: string; prefixLen: number | null; interface: string | null; kind: string | null; deprecated: boolean };
 export type Device = {
+  /** Hostname reported by ipv6who, or the URL's host when it is unreachable. */
   name: string;
-  kind: string;
+  url: string;
+  os: "linux" | "macos" | "windows" | string | null;
+  /** Readable OS name, e.g. "Fedora Linux 44 (Cloud Edition)". */
+  osName: string | null;
+  arch: string | null;
   address: string | null;
   interface: string | null;
   addressType: string | null;

@@ -64,18 +64,14 @@ description = "仅局域网"
 group = "家"
 
 # ------------------------------------------------------------------ devices
-# Each device runs ipv6who. Its `allow` list must include this server's address.
-# kind: server, nas, desktop, laptop, router, phone, pi
+# Each device runs ipv6who; its allow list must include this server's address.
+# Only the URL is needed: the name, OS and icon come from ipv6who itself.
 # token: key under [tokens] in secrets.toml (defaults to "ipv6who" when present)
 
 [[devices]]
-name = "NAS"
-kind = "nas"
 url = "http://192.168.1.10:8066"
 
 [[devices]]
-name = "Desktop"
-kind = "desktop"
 url = "http://192.168.1.30:8066"
 
 # ------------------------------------------------------------------ widgets

@@ -177,7 +177,7 @@ cd ~/homepage
 
 | 组件 | 需要 |
 |---|---|
-| 局域网 IPv6 | 每台设备运行 ipv6who，其 `allow` 包含 homepage 服务器地址；如设置了 `token`，在 secrets 里加 `ipv6who = "…"` 或给设备单独指定 `token = "<key>"` |
+| 局域网 IPv6 | 每台设备运行 ipv6who，其 `allow` 包含 homepage 服务器地址。`[[devices]]` 只需要 `url`，设备名称（主机名）、系统和图标都来自 ipv6who 的返回；如设置了 `token`，在 secrets 里加 `ipv6who = "…"` 或给设备单独指定 `token = "<key>"` |
 | Vikunja | API token（tasks: read_all + update，projects: read_all）。勾选完成会写回 Vikunja |
 | Forgejo | `username`；私有仓库需要 token |
 | GitHub | `username`；可选 token 用于贡献日历（GraphQL 需要认证） |

@@ -8,18 +8,18 @@
   let expanded = $state<Record<string, boolean>>({});
   let timer: ReturnType<typeof setTimeout> | undefined;
 
-  const kinds: Record<string, string> = {
-    server: "server",
-    nas: "nas",
-    desktop: "desktop",
-    pc: "desktop",
-    laptop: "laptop",
-    router: "router",
-    phone: "phone",
-    pi: "chip",
-    raspberrypi: "chip",
-    sbc: "chip",
-  };
+  /** Icon from the OS ipv6who reports: Linux boxes are servers (ARM boards get a chip). */
+  function iconFor(device: Device): string {
+    switch (device.os) {
+      case "linux":
+        return device.arch === "aarch64" || device.arch === "arm64" ? "chip" : "server";
+      case "macos":
+      case "windows":
+        return "desktop";
+      default:
+        return "server";
+    }
+  }
 
   async function copy(address: string) {
     try {
@@ -47,15 +47,16 @@
 </div>
 
 <ul>
-  {#each devices as device (device.name)}
+  {#each devices as device (device.url)}
     {@const others = device.addresses.filter((a) => a.address !== device.address)}
     <li>
       <span class="kind" class:offline={!device.address}>
-        <Icon name={kinds[device.kind.toLowerCase()] ?? "server"} size={17} />
+        <Icon name={iconFor(device)} size={17} />
       </span>
       <div class="info">
         <div class="head">
-          <span class="name">{device.name}</span>
+          <span class="name" title={device.url}>{device.name}</span>
+          {#if device.osName}<span class="tag">{device.osName}</span>{/if}
           {#if device.interface}<span class="tag mono">{device.interface}</span>{/if}
           {#if device.addressType && device.addressType !== "static"}<span class="tag">{device.addressType}</span>{/if}
         </div>
@@ -73,10 +74,10 @@
             <span class="visually-hidden" aria-live="polite">{copied === device.address ? "已复制" : ""}</span>
           </button>
           {#if others.length > 0}
-            <button class="more" onclick={() => (expanded[device.name] = !expanded[device.name])} aria-expanded={!!expanded[device.name]}>
-              {expanded[device.name] ? "收起" : `另有 ${others.length} 个地址`}
+            <button class="more" onclick={() => (expanded[device.url] = !expanded[device.url])} aria-expanded={!!expanded[device.url]}>
+              {expanded[device.url] ? "收起" : `另有 ${others.length} 个地址`}
             </button>
-            {#if expanded[device.name]}
+            {#if expanded[device.url]}
               <ul class="others">
                 {#each others as other (other.address)}
                   <li>
@@ -160,8 +161,9 @@
 
   .head {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 6px;
+    gap: 4px 6px;
     min-width: 0;
   }
   .name {

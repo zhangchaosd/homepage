@@ -27,10 +27,14 @@ def at(days, hour=18, minute=0):
 
 DEVICES = {
     "nas": {"address": "2408:8207:2c41:5a10::10", "interface": "eth0", "type": "static",
-            "extra": [("2408:8207:2c41:5a10:be24:11ff:fe8a:3c21", "dynamic")]},
-    "server": {"address": "2408:8207:2c41:5a10:5054:ff:fe12:a7b3", "interface": "enp3s0", "type": "dynamic", "extra": []},
-    "desktop": {"address": "2408:8207:2c41:5a10:9d3e:41c2:7f0a:12e8", "interface": "Ethernet", "type": "dynamic", "extra": []},
-    "pi": None,  # no global address -> 503
+            "extra": [("2408:8207:2c41:5a10:be24:11ff:fe8a:3c21", "dynamic")],
+            "system": {"hostname": "nas.lan", "os": "linux", "name": "Fedora Linux 44 (Cloud Edition)", "version": "44", "arch": "x86_64"}},
+    "server": {"address": "2408:8207:2c41:5a10:5054:ff:fe12:a7b3", "interface": "enp3s0", "type": "dynamic", "extra": [],
+               "system": {"hostname": "Mac_mini_M5Pro.lan", "os": "macos", "name": "macOS 27.0.1", "version": "27.0.1", "arch": "aarch64"}},
+    "desktop": {"address": "2408:8207:2c41:5a10:9d3e:41c2:7f0a:12e8", "interface": "Ethernet", "type": "dynamic", "extra": [],
+                "system": {"hostname": "Windows11onPVE", "os": "windows", "name": "Windows 11 Pro 25H2", "version": "10.0.26200", "arch": "x86_64"}},
+    # No global address -> 503, which still reports the host.
+    "pi": {"address": None, "system": {"hostname": "raspberrypi", "os": "linux", "name": "Debian GNU/Linux 12 (bookworm)", "version": "12", "arch": "aarch64"}},
 }
 
 TASKS = [
@@ -119,13 +123,15 @@ class Handler(BaseHTTPRequestHandler):
         if parts[0] == "ipv6" and len(parts) >= 3:
             device = DEVICES.get(parts[1])
             if device is None:
-                return self.send(503, {"error": "no global IPv6 address found", "addresses": []})
+                return self.send(404, {"error": "unknown device"})
+            if device["address"] is None:
+                return self.send(503, {"error": "no global IPv6 address found", "addresses": [], "system": device["system"]})
             addresses = [{"address": device["address"], "prefix_len": 64, "interface": device["interface"], "type": device["type"],
                           "scope": "global", "deprecated": False}]
             addresses += [{"address": a, "prefix_len": 64, "interface": device["interface"], "type": t, "scope": "global",
                            "deprecated": False} for a, t in device["extra"]]
             return self.send(200, {"address": device["address"], "interface": device["interface"], "type": device["type"],
-                                   "addresses": addresses})
+                                   "addresses": addresses, "system": device["system"]})
         if path == "/inbox/health/ready":
             return self.send(200, {"status": "ok"})
         if path == "/inbox/api/v1/capabilities":

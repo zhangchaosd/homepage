@@ -141,14 +141,17 @@ pub struct Service {
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct DeviceSection {
-    name: String,
-    /// ipv6who base URL, e.g. http://192.168.1.10:8066
+    /// ipv6who base URL, e.g. http://192.168.1.10:8066. Name, OS and icon come
+    /// from ipv6who's own `system` report.
     url: String,
-    #[serde(default)]
-    kind: Option<String>,
     /// Key in secrets.toml `[tokens]`; defaults to "ipv6who" when that key exists.
     #[serde(default)]
     token: Option<String>,
+    /// No longer used; accepted so older configs keep loading after an update.
+    #[serde(default)]
+    name: Option<String>,
+    #[serde(default)]
+    kind: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -282,9 +285,7 @@ pub struct Config {
 
 #[derive(Clone, Debug)]
 pub struct Device {
-    pub name: String,
     pub url: String,
-    pub kind: String,
     pub token: Option<String>,
 }
 
@@ -428,14 +429,19 @@ impl Config {
                 {
                     return Err(invalid(format!(
                         "device {} uses token `{key}`, which is missing from secrets.toml",
-                        device.name
+                        device.url
                     )));
+                }
+                if device.name.is_some() || device.kind.is_some() {
+                    // Tracing is not set up yet while the config loads.
+                    eprintln!(
+                        "homepage: warning: [[devices]] name/kind for {} are ignored; the name, OS and icon now come from ipv6who",
+                        device.url
+                    );
                 }
                 Ok(Device {
                     token: token(device.token.as_deref(), "ipv6who"),
                     url: device.url.trim_end_matches('/').to_owned(),
-                    kind: device.kind.unwrap_or_else(|| "server".into()),
-                    name: device.name,
                 })
             })
             .collect::<AppResult<Vec<_>>>()?;
