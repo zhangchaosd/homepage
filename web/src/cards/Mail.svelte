@@ -25,7 +25,8 @@
 {#if data.messages.length === 0}
   <p class="empty">收件箱是空的</p>
 {:else}
-  <ul>
+  <!-- The list scrolls inside the card past about eight messages, so twenty do not stretch the row. -->
+  <ul class="scroll">
     {#each data.messages as message (message.uid)}
       {@const link = href(message.messageId)}
       <li class:unread={message.unread}>
@@ -73,6 +74,20 @@
     list-style: none;
     margin: 0;
     padding: 0;
+  }
+  .scroll {
+    max-height: 440px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: var(--faint) transparent;
+    /* The last visible row fades, which says there is more below. */
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent);
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent);
+    padding-bottom: 20px;
+  }
+  .scroll:not(:hover)::-webkit-scrollbar {
+    width: 6px;
   }
   li {
     border-top: 1px solid var(--hair-soft);
