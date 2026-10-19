@@ -99,6 +99,21 @@ username = "zhangchaosd"
 limit = 6
 # refresh = 900
 
+# Gmail: imap.gmail.com, an app password in secrets.toml. iCloud: imap.mail.me.com.
+# Read-only: messages are never marked read.
+[mail]
+host = "imap.gmail.com"
+username = "you@gmail.com"
+link = "https://mail.google.com/mail/u/0"
+limit = 20
+# mailbox = "INBOX"
+# refresh = 300
+
+# DeepSeek platform balance; the API key goes in secrets.toml.
+[deepseek]
+# link = "https://platform.deepseek.com/usage"
+# refresh = 600
+
 # bookmarkd v0.7.0+. `link` must be bookmarkd's public_url: it only answers
 # requests for that host, which the homepage sends when `url` is a LAN address.
 [bookmarkd]

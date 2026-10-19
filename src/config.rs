@@ -88,6 +88,8 @@ struct FileConfig {
     bookmarkd: Option<BookmarkdSection>,
     homeassistant: Option<HomeAssistantSection>,
     inbox: Option<InboxSection>,
+    mail: Option<MailSection>,
+    deepseek: Option<DeepseekSection>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -229,6 +231,40 @@ struct InboxSection {
     refresh: Option<u64>,
 }
 
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct MailSection {
+    /// IMAP host, e.g. imap.gmail.com
+    host: String,
+    #[serde(default = "default_imap_port")]
+    port: u16,
+    /// Plain IMAP without TLS: only for a mock on localhost.
+    #[serde(default = "default_true")]
+    tls: bool,
+    username: String,
+    /// Key in secrets.toml `[tokens]` holding the password (an app password for
+    /// Gmail or iCloud); defaults to "mail".
+    token: Option<String>,
+    #[serde(default = "default_mailbox")]
+    mailbox: String,
+    /// Where 打开 goes: the webmail. Gmail links each message by its Message-ID.
+    link: Option<String>,
+    #[serde(default = "default_mail_limit")]
+    limit: usize,
+    refresh: Option<u64>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct DeepseekSection {
+    /// Key in secrets.toml `[tokens]` holding the API key; defaults to "deepseek".
+    token: Option<String>,
+    /// API base; only a mock changes it.
+    url: Option<String>,
+    link: Option<String>,
+    refresh: Option<u64>,
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct HaEntity {
@@ -262,6 +298,18 @@ fn default_inbox_limit() -> usize {
 fn default_bookmark_limit() -> usize {
     12
 }
+fn default_imap_port() -> u16 {
+    993
+}
+fn default_true() -> bool {
+    true
+}
+fn default_mailbox() -> String {
+    "INBOX".into()
+}
+fn default_mail_limit() -> usize {
+    20
+}
 
 // ------------------------------------------------------------- resolved config
 
@@ -286,6 +334,29 @@ pub struct Config {
     pub bookmarkd: Option<Bookmarkd>,
     pub homeassistant: Option<HomeAssistant>,
     pub inbox: Option<Inbox>,
+    pub mail: Option<Mail>,
+    pub deepseek: Option<Deepseek>,
+}
+
+#[derive(Clone, Debug)]
+pub struct Mail {
+    pub host: String,
+    pub port: u16,
+    pub tls: bool,
+    pub username: String,
+    pub password: String,
+    pub mailbox: String,
+    pub link: Option<String>,
+    pub limit: usize,
+    pub refresh: Duration,
+}
+
+#[derive(Clone, Debug)]
+pub struct Deepseek {
+    pub token: String,
+    pub url: String,
+    pub link: String,
+    pub refresh: Duration,
 }
 
 #[derive(Clone, Debug)]
@@ -532,6 +603,39 @@ impl Config {
             })
             .transpose()?;
 
+        let mail = file
+            .mail
+            .map(|section| -> AppResult<Mail> {
+                Ok(Mail {
+                    password: required(section.token.as_deref(), "mail")?,
+                    host: section.host,
+                    port: section.port,
+                    tls: section.tls,
+                    username: section.username,
+                    mailbox: section.mailbox,
+                    link: section.link.map(|link| base_url(&link)),
+                    limit: section.limit.clamp(1, 50),
+                    refresh: refresh(section.refresh, 300),
+                })
+            })
+            .transpose()?;
+        let deepseek = file
+            .deepseek
+            .map(|section| -> AppResult<Deepseek> {
+                Ok(Deepseek {
+                    token: required(section.token.as_deref(), "deepseek")?,
+                    url: base_url(section.url.as_deref().unwrap_or("https://api.deepseek.com")),
+                    link: base_url(
+                        section
+                            .link
+                            .as_deref()
+                            .unwrap_or("https://platform.deepseek.com/usage"),
+                    ),
+                    refresh: refresh(section.refresh, 600),
+                })
+            })
+            .transpose()?;
+
         Ok(Self {
             dir: dir.to_path_buf(),
             state_dir: dir.join("state"),
@@ -554,6 +658,8 @@ impl Config {
             bookmarkd,
             homeassistant,
             inbox,
+            mail,
+            deepseek,
         })
     }
 }

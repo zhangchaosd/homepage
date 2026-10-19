@@ -112,3 +112,13 @@ entities = [
 [inbox]
 url = "http://127.0.0.1:8901/inbox"
 link = "https://inbox.example.com"
+
+[mail]
+host = "127.0.0.1"
+port = 8902
+tls = false
+username = "chao"
+link = "https://mail.google.com/mail/u/0"
+
+[deepseek]
+url = "http://127.0.0.1:8901/deepseek"

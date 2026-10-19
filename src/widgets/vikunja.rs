@@ -1,5 +1,5 @@
-//! Open Vikunja tasks that are overdue, due today, or due within
-//! `upcoming_days`. The browser groups them in its own time zone.
+//! Open Vikunja tasks that are overdue, due today, due within `upcoming_days`,
+//! or have no due date at all. The browser groups them in its own time zone.
 
 use std::collections::HashMap;
 
@@ -107,7 +107,8 @@ pub async fn fetch(client: &reqwest::Client, config: &Vikunja) -> FetchResult {
     let filter = format!("done = false && due_date < now/d+{horizon}d");
     let query = [
         ("filter", filter.as_str()),
-        ("filter_include_nulls", "false"),
+        // Vikunja treats a missing due date as matching `due_date < …` when nulls are included.
+        ("filter_include_nulls", "true"),
         ("sort_by", "due_date"),
         ("order_by", "asc"),
         ("per_page", "100"),

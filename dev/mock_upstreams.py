@@ -9,8 +9,12 @@ responses under path prefixes; see dev/config/config.toml.
 
 import json
 import random
+import socketserver
 import struct
+import threading
 import zlib
+from email.header import Header
+from email.utils import format_datetime
 from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
@@ -46,6 +50,8 @@ TASKS = [
     {"id": 104, "title": "整理 Obsidian 周报", "due_date": at(1, 10, 0), "priority": 1, "project_id": 3, "labels": []},
     {"id": 105, "title": "检查 Home Assistant 自动化日志", "due_date": at(3, 0, 0), "priority": 1, "project_id": 1, "labels": [{"title": "家", "hex_color": "3a74b8"}]},
     {"id": 106, "title": "买猫粮", "due_date": at(5, 0, 0), "priority": 0, "project_id": 4, "labels": []},
+    {"id": 107, "title": "读完《Designing Data-Intensive Applications》", "due_date": "0001-01-01T00:00:00Z", "priority": 0, "project_id": 3, "labels": []},
+    {"id": 108, "title": "研究一下 Tailscale 的 exit node", "due_date": "0001-01-01T00:00:00Z", "priority": 1, "project_id": 1, "labels": [{"title": "家", "hex_color": "3a74b8"}]},
 ]
 PROJECTS = [{"id": 1, "title": "基础设施"}, {"id": 2, "title": "Homepage"}, {"id": 3, "title": "写作"}, {"id": 4, "title": "生活"}]
 
@@ -92,6 +98,80 @@ INBOX = {"instance_id": "dfb5b8e8-9171-479e-aa8e-db2b23c13e02", "data_generation
 ]}
 INBOX_TOKEN = "Bearer dev-inbox-token"
 LABELS = [{"id": 1, "title": "运维", "hex_color": "e8590c"}, {"id": 2, "title": "开发", "hex_color": "2f7f68"}, {"id": 3, "title": "家", "hex_color": "3a74b8"}]
+
+
+MAIL = [
+    ("GitHub", "noreply@github.com", "[zhangchaosd/homepage] Release v0.5.0 published", 0.3, False),
+    ("Cloudflare", "noreply@notify.cloudflare.com", "Your domain zhangchao.dev renews in 30 days", 2.5, False),
+    ("王小明", "xiaoming@example.com", "周末一起看 Home Assistant 的自动化？", 5, False),
+    ("Hacker News Digest", "digest@hndigest.example", "Top stories: Rust 2026 edition, IPv6 adoption passes 50%", 9, True),
+    ("Forgejo", "forgejo@git.example.com", "[homepage] New issue #42: 邮件模块显示未读数", 14, True),
+    ("Apple", "no_reply@email.apple.com", "Your receipt from Apple", 26, True),
+    ("少数派", "newsletter@sspai.com", "本周精选：自托管入门指南", 40, True),
+    ("Tailscale", "support@tailscale.com", "A new device joined your tailnet", 52, True),
+    ("DeepSeek", "service@deepseek.com", "账户余额不足 ¥20 提醒", 70, True),
+    ("Vikunja", "vikunja@todo.example.com", "任务提醒：续费域名 example.com", 80, True),
+    ("Amazon", "ship-confirm@amazon.com", "Your order has shipped", 96, True),
+    ("Let's Encrypt", "expiry@letsencrypt.org", "Certificate expiration notice", 120, True),
+    ("Caddy Community", "noreply@caddy.community", "[Caddy] Summary of recent discussions", 150, True),
+    ("Proxmox", "root@pve.lan", "Backup job completed successfully", 170, True),
+    ("Obsidian", "hello@obsidian.md", "Obsidian 1.9 is out", 200, True),
+    ("Home Assistant", "hass@home.lan", "Home Assistant 2026.10 update available", 230, True),
+    ("Rust Blog", "blog@rust-lang.org", "Announcing Rust 1.95", 260, True),
+    ("中国移动", "10086@139.com", "您的本月流量已使用 80%", 300, True),
+    ("Mozilla", "mdn@mozilla.com", "MDN newsletter: CSS light-dark() everywhere", 330, True),
+    ("bookmarkd", "bookmarkd@bookmark.example.com", "每周书签回顾", 360, True),
+    ("Fedora", "announce@fedoraproject.org", "Fedora 44 released", 400, True),
+    ("Router", "admin@router.lan", "WAN link flapped 3 times", 420, True),
+]
+
+
+class ImapHandler(socketserver.StreamRequestHandler):
+    """Enough of IMAP for the homepage: LOGIN, EXAMINE, SEARCH UNSEEN, FETCH."""
+
+    def send(self, line):
+        self.wfile.write((line + "\r\n").encode())
+
+    def handle(self):
+        self.send("* OK mock IMAP ready")
+        while True:
+            raw = self.rfile.readline()
+            if not raw:
+                return
+            tag, _, rest = raw.decode(errors="replace").strip().partition(" ")
+            command, _, args = rest.partition(" ")
+            command = command.upper()
+            if command == "LOGIN":
+                if '"dev-mail-password"' in args:
+                    self.send(f"{tag} OK LOGIN completed")
+                else:
+                    self.send(f"{tag} NO [AUTHENTICATIONFAILED] Invalid credentials")
+            elif command == "EXAMINE":
+                self.send(f"* {len(MAIL)} EXISTS")
+                self.send("* 0 RECENT")
+                self.send(f"{tag} OK [READ-ONLY] EXAMINE completed")
+            elif command == "SEARCH":
+                unseen = [str(i + 1) for i, m in enumerate(reversed(MAIL)) if not m[4]]
+                self.send("* SEARCH " + " ".join(unseen))
+                self.send(f"{tag} OK SEARCH completed")
+            elif command == "FETCH":
+                first, last = args.split(" ", 1)[0].split(":")
+                ordered = list(reversed(MAIL))  # sequence 1 is the oldest
+                for seq in range(int(first), int(last) + 1):
+                    name, addr, subject, hours, seen = ordered[seq - 1]
+                    when = NOW - timedelta(hours=hours)
+                    header = (f"Subject: {Header(subject, 'utf-8').encode()}\r\nFrom: {Header(name, 'utf-8').encode()} <{addr}>\r\n"
+                              f"Date: {format_datetime(when)}\r\nMessage-ID: <m{seq}@mock.example>\r\n\r\n").encode()
+                    flags = "\\Seen" if seen else ""
+                    self.wfile.write((f"* {seq} FETCH (UID {1000 + seq} FLAGS ({flags}) INTERNALDATE \"{when.strftime('%d-%b-%Y %H:%M:%S %z')}\" "
+                                      f"BODY[HEADER.FIELDS (SUBJECT FROM DATE MESSAGE-ID)] {{{len(header)}}}\r\n").encode() + header + b")\r\n")
+                self.send(f"{tag} OK FETCH completed")
+            elif command == "LOGOUT":
+                self.send("* BYE")
+                self.send(f"{tag} OK LOGOUT completed")
+                return
+            else:
+                self.send(f"{tag} BAD unknown command")
 
 
 def png(rgb, w=160, h=120):
@@ -192,6 +272,10 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header("content-length", str(len(data)))
             self.end_headers()
             return self.wfile.write(data)
+        if path == "/deepseek/user/balance":
+            if self.headers.get("authorization") != "Bearer dev-deepseek-key":
+                return self.send(401, {"error": {"message": "Authentication Fails"}})
+            return self.send(200, {"is_available": True, "balance_infos": [{"currency": "CNY", "total_balance": "86.42", "granted_balance": "0.00", "topped_up_balance": "86.42"}]})
         if path == "/vikunja/api/v1/labels":
             return self.send(200, LABELS)
         if path == "/vikunja/api/v1/user":
@@ -322,4 +406,7 @@ if __name__ == "__main__":
     print(f"mock upstreams on http://127.0.0.1:{PORT}")
     # The homepage probes everything at once; the default backlog of 5 drops connections.
     ThreadingHTTPServer.request_queue_size = 128
+    imap = socketserver.ThreadingTCPServer(("127.0.0.1", PORT + 1), ImapHandler)
+    threading.Thread(target=imap.serve_forever, daemon=True).start()
+    print(f"mock IMAP on 127.0.0.1:{PORT + 1} (user chao, password dev-mail-password)")
     ThreadingHTTPServer(("127.0.0.1", PORT), Handler).serve_forever()

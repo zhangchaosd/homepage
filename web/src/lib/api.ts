@@ -126,6 +126,20 @@ export type InboxDetail = {
 };
 export type InboxReceipt = { item_id: string | null; status: string };
 
+export type MailMessage = {
+  uid: number;
+  subject: string;
+  from: string;
+  address: string;
+  date: string | null;
+  unread: boolean;
+  messageId: string | null;
+};
+export type Mail = { messages: MailMessage[]; total: number; unread: number; mailbox: string; link: string | null };
+
+export type DeepseekBalance = { currency: string; totalBalance: string; grantedBalance: string; toppedUpBalance: string };
+export type Deepseek = { available: boolean; balances: DeepseekBalance[]; link: string };
+
 export type Widgets = {
   health?: Slot<Health>;
   devices?: Slot<Device[]>;
@@ -135,12 +149,14 @@ export type Widgets = {
   bookmarkd?: Slot<Bookmarks>;
   homeassistant?: Slot<HomeAssistant>;
   inbox?: Slot<InboxStatus>;
+  mail?: Slot<Mail>;
+  deepseek?: Slot<Deepseek>;
 };
 
 export type Dashboard = {
   profile: { name: string; tagline: string; title?: string | null; theme?: string | null };
   services: Service[];
-  links: Partial<Record<"vikunja" | "forgejo" | "github" | "bookmarkd" | "homeassistant" | "inbox", string>>;
+  links: Partial<Record<"vikunja" | "forgejo" | "github" | "bookmarkd" | "homeassistant" | "inbox" | "mail" | "deepseek", string>>;
   widgets: Widgets;
   serverTime: number;
 };

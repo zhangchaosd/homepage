@@ -224,6 +224,16 @@ pub async fn dashboard(State(state): State<AppState>) -> Json<DashboardResponse>
     if let Some(section) = &config.inbox {
         links.insert("inbox", section.link.clone());
     }
+    if let Some(link) = config
+        .mail
+        .as_ref()
+        .and_then(|section| section.link.clone())
+    {
+        links.insert("mail", link);
+    }
+    if let Some(section) = &config.deepseek {
+        links.insert("deepseek", section.link.clone());
+    }
     Json(DashboardResponse {
         profile: config.profile.clone(),
         services: config.services.clone(),

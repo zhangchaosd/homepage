@@ -10,6 +10,8 @@
   import Bookmarks from "./cards/Bookmarks.svelte";
   import Home from "./cards/Home.svelte";
   import Inbox from "./cards/Inbox.svelte";
+  import Mail from "./cards/Mail.svelte";
+  import Deepseek from "./cards/Deepseek.svelte";
   import SettingsDialog from "./SettingsDialog.svelte";
   import { ApiError, getDashboard, getUpdate, logout, type Dashboard, type UpdateStatus } from "./lib/api";
   import { dayDiff, greeting } from "./lib/time";
@@ -94,7 +96,8 @@
   // Rows share their width between whatever is configured; a missing integration never leaves a hole.
   const row2 = $derived([w.vikunja && "todo", w.devices && "devices", w.homeassistant && "home"].filter(Boolean) as string[]);
   const row3 = $derived([w.forgejo && "commits", w.bookmarkd && "bookmarks", w.inbox && "inbox"].filter(Boolean) as string[]);
-  const weights: Record<string, number> = { todo: 5, devices: 4, home: 3, commits: 5, bookmarks: 3, inbox: 4 };
+  const row4 = $derived([w.mail && "mail", w.deepseek && "deepseek"].filter(Boolean) as string[]);
+  const weights: Record<string, number> = { todo: 5, devices: 4, home: 3, commits: 5, bookmarks: 3, inbox: 4, mail: 8, deepseek: 4 };
   function span(row: string[], key: string): number {
     const total = row.reduce((sum, k) => sum + (weights[k] ?? 4), 0);
     return Math.round(((weights[key] ?? 4) / total) * 12);
@@ -102,7 +105,7 @@
 
   // Section numbers follow document order, skipping what is not configured.
   const order = $derived(
-    [...row2, ...row3, w.github && "github", dash.services.length > 0 && "services"].filter(Boolean) as string[],
+    [...row2, ...row3, ...row4, w.github && "github", dash.services.length > 0 && "services"].filter(Boolean) as string[],
   );
   const index = (key: string) => order.indexOf(key) + 1;
 
@@ -244,6 +247,24 @@
                   {#if w.inbox?.error}<span class="pill warn" title={w.inbox.error}><i class="dot down"></i>状态未知</span>{/if}
                 {/snippet}
                 <Inbox status={w.inbox.data} link={dash.links.inbox} onsent={reload} />
+              </Card>
+            {/if}
+          </div>
+        {/each}
+      </div>
+    {/if}
+
+    {#if row4.length > 0}
+      <div class="row">
+        {#each row4 as key (key)}
+          <div class="cell" style:--span={span(row4, key)}>
+            {#if key === "mail" && w.mail}
+              <Card index={index(key)} title="邮件" icon="mail" slot={w.mail} widget="mail" link={dash.links.mail} onrefreshed={reload}>
+                {#if w.mail.data}<Mail data={w.mail.data} />{/if}
+              </Card>
+            {:else if key === "deepseek" && w.deepseek}
+              <Card index={index(key)} title="DeepSeek" icon="spark" slot={w.deepseek} widget="deepseek" link={dash.links.deepseek} linkLabel="用量" onrefreshed={reload}>
+                {#if w.deepseek.data}<Deepseek data={w.deepseek.data} />{/if}
               </Card>
             {/if}
           </div>

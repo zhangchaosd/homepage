@@ -4,12 +4,14 @@
 //! records the error next to it.
 
 mod bookmarkd;
+mod deepseek;
 mod devices;
 mod forgejo;
 mod github;
 mod health;
 mod homeassistant;
 pub mod inbox;
+mod mail;
 pub mod vikunja;
 
 use std::{collections::HashMap, sync::Arc, time::Duration};
@@ -31,6 +33,8 @@ pub enum Widget {
     Bookmarkd,
     HomeAssistant,
     Inbox,
+    Mail,
+    Deepseek,
 }
 
 impl Widget {
@@ -44,6 +48,8 @@ impl Widget {
             Self::Bookmarkd => "bookmarkd",
             Self::HomeAssistant => "homeassistant",
             Self::Inbox => "inbox",
+            Self::Mail => "mail",
+            Self::Deepseek => "deepseek",
         }
     }
 
@@ -57,6 +63,8 @@ impl Widget {
             Self::Bookmarkd,
             Self::HomeAssistant,
             Self::Inbox,
+            Self::Mail,
+            Self::Deepseek,
         ]
         .into_iter()
         .find(|widget| widget.key() == key)
@@ -145,6 +153,12 @@ impl Hub {
         if let Some(section) = &config.inbox {
             widgets.push((Widget::Inbox, section.refresh));
         }
+        if let Some(section) = &config.mail {
+            widgets.push((Widget::Mail, section.refresh));
+        }
+        if let Some(section) = &config.deepseek {
+            widgets.push((Widget::Deepseek, section.refresh));
+        }
         widgets
     }
 
@@ -195,6 +209,14 @@ impl Hub {
             },
             Widget::Inbox => match &config.inbox {
                 Some(section) => inbox::fetch(&self.client, section).await,
+                None => return,
+            },
+            Widget::Mail => match &config.mail {
+                Some(section) => mail::fetch(section).await,
+                None => return,
+            },
+            Widget::Deepseek => match &config.deepseek {
+                Some(section) => deepseek::fetch(&self.client, section).await,
                 None => return,
             },
         };

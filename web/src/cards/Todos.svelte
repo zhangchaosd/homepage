@@ -18,8 +18,13 @@
     const overdue: Task[] = [];
     const due: Task[] = [];
     const upcoming: Task[] = [];
+    const undated: Task[] = [];
     for (const task of data.tasks) {
-      if (done[task.id] || !task.due) continue;
+      if (done[task.id]) continue;
+      if (!task.due) {
+        undated.push(task);
+        continue;
+      }
       const diff = dayDiff(new Date(task.due), today);
       const past = new Date(task.due).getTime() < today.getTime();
       if (diff < 0 || (diff === 0 && past && hasTime(task.due))) overdue.push(task);
@@ -30,6 +35,7 @@
       { key: "overdue", label: "已逾期", tasks: overdue },
       { key: "today", label: "今天", tasks: due },
       { key: "upcoming", label: `接下来 ${data.upcomingDays} 天`, tasks: upcoming },
+      { key: "undated", label: "没有截止日期", tasks: undated },
     ].filter((group) => group.tasks.length > 0);
   });
 

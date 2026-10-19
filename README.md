@@ -4,11 +4,13 @@
 
 - **服务启动台**（页面最底部，搜索时提到最前）：一键打开 Forgejo、Vikunja、bookmarkd、Obsidian Web Gateway、Home Assistant…，每个服务带在线状态（服务端探测局域网地址）
 - **局域网 IPv6**：通过各设备上的 [ipv6who](https://github.com/zhangchaosd/ipv6who) 显示当前全局 IPv6 地址，点击即可复制
-- **今日待办**：Vikunja 中已逾期、今天和未来几天的任务，可直接勾选完成；「添加」可新建任务，选截止日期和时间、优先级、项目，选已有标签或新建标签
+- **今日待办**：Vikunja 中已逾期、今天、未来几天以及没有截止日期的任务，可直接勾选完成；「添加」可新建任务，选截止日期和时间、优先级、项目，选已有标签或新建标签
 - **最近提交**：Forgejo 动态里的提交 + 近半年贡献热力图
 - **GitHub**：资料、最近推送的仓库和近一年贡献日历（GitHub 绿）。有 token 时走 GraphQL，没有时读取 GitHub 个人主页公开的贡献日历
 - **置顶书签**：bookmarkd 中置顶的书签（需要只读 token，见下文）
 - **家**：Home Assistant 中指定实体的状态
+- **邮件**：IMAP 只读收件箱最近若干封（默认 20），显示发件人、主题、时间和未读数，不会把邮件标成已读；Gmail 可点开单封邮件
+- **DeepSeek**：API 余额、充值与赠送余额、账户是否可用
 - **收件箱**：在主页上直接投递文字和链接到 [跨设备收件箱](https://github.com/zhangchaosd/cross-device-inbox)（inboxd），正文中的网址自动识别为链接；令牌可读时同时显示最近收件；点开一条在弹窗里看全文、链接和附件（图片预览、下载），可改标题、置顶、移入回收站（可撤销）
 - `/` 或 `⌘K` 搜索服务和书签，回车打开第一个结果
 - **在线更新**：每天自动检查 GitHub Releases，右上角提示新版本，点"安装并重启"即可升级，无需重新部署
@@ -181,6 +183,8 @@ cd ~/homepage
 | 局域网 IPv6 | 每台设备运行 ipv6who，其 `allow` 包含 homepage 服务器地址。`[[devices]]` 只需要 `url`，设备名称（主机名）、系统和图标都来自 ipv6who 的返回；如设置了 `token`，在 secrets 里加 `ipv6who = "…"` 或给设备单独指定 `token = "<key>"` |
 | Vikunja | API token（tasks: read_all + update + create，projects: read_all，labels: read_all + create，task labels: bulk）。勾选完成和添加任务会写回 Vikunja；新任务默认放进 Vikunja 账号设置里的默认项目 |
 | Forgejo | `username`；私有仓库需要 token |
+| 邮件 | `[mail]`：`host`、`username`、可选 `port`（默认 993）、`mailbox`（默认 INBOX）、`limit`（默认 20）、`link`（网页邮箱）；密码写在 `secrets.toml` 的 `mail`。Gmail 和 iCloud 要用「应用专用密码」，QQ/163 用授权码。只读，不标已读 |
+| DeepSeek | `[deepseek]`：API key 写在 `secrets.toml` 的 `deepseek`（平台 → API keys）；可选 `link` |
 | GitHub | `username`；可选 token（无需任何权限）用于 API 限额和 GraphQL 贡献日历，不配时贡献日历从公开页面读取 |
 | bookmarkd | v0.7.0+。在 bookmarkd 所在机器上运行 `bookmarkd token create homepage` 生成只读 token。`link` 必须是 bookmarkd 的 `public_url`：bookmarkd 只接受 Host 为该地址的请求，`url` 用局域网地址时主页会自动带上这个 Host |
 | Home Assistant | 长期访问令牌 + `entities` 列表 |
