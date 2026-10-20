@@ -362,6 +362,9 @@
   .swatch[data-swatch="industrial"] i:nth-child(1) { background: #e9e7e1; border: 1px solid #c9c6be; border-radius: 5px; }
   .swatch[data-swatch="industrial"] i:nth-child(2) { background: #1d1e1a; border-radius: 5px; }
   .swatch[data-swatch="industrial"] i:nth-child(3) { background: #ff5a1f; border-radius: 5px; }
+  .swatch[data-swatch="native"] i:nth-child(1) { background: #f2f2f7; border: 1px solid rgba(60, 60, 67, 0.22); border-radius: 7px; }
+  .swatch[data-swatch="native"] i:nth-child(2) { background: #1c1c1e; border-radius: 7px; }
+  .swatch[data-swatch="native"] i:nth-child(3) { background: #007aff; border-radius: 7px; }
   .swatch[data-swatch="swiss"] i:nth-child(1) { background: #f6f6f3; border: 1.5px solid #0d0d0c; }
   .swatch[data-swatch="swiss"] i:nth-child(2) { background: #0d0d0c; }
   .swatch[data-swatch="swiss"] i:nth-child(3) { background: #1f3fd6; }

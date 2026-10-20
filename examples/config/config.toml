@@ -22,7 +22,7 @@ username = "chao"
 name = "Chao"
 tagline = "所有自托管服务的统一入口。"
 title = "Chao · Home"
-# Default look: "paper" (晨报), "panel" (控制台), "swiss" (工作台), "scifi" (科幻), "future" (未来), "tech" (科技) or "industrial" (工业).
+# Default look: "paper" (晨报), "panel" (控制台), "swiss" (工作台), "scifi" (科幻), "future" (未来), "tech" (科技), "industrial" (工业) or "native" (原生).
 # Each browser can pick its own in 设置 → 外观; that choice wins over this.
 theme = "paper"
 

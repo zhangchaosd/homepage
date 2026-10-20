@@ -1,0 +1,321 @@
+/* =====================================================================
+   原生 native — the system's own grouped lists. Built on the panel family;
+   this file sets its tokens and the platform vocabulary: the system font,
+   a large title, grouped cards with half-pixel separators under a plain
+   section caption, system blue/green/orange/red, a translucent toolbar,
+   round checks. No gradients, glows or decoration: hierarchy comes from
+   weight, size and spacing.
+
+   Rules under :root[data-theme="native"]:not(#_) carry an id's weight so
+   they win over the components' scoped panel-family rules.
+   ===================================================================== */
+
+:root[data-theme="native"] {
+  --font-sans: -apple-system, BlinkMacSystemFont, system-ui, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+    "Noto Sans CJK SC", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --bg: light-dark(#f2f2f7, #1c1c1e);
+  --bg-2: light-dark(#e9e9ee, #161618);
+  --surface: light-dark(#ffffff, #2c2c2e);
+  --surface-2: light-dark(rgba(120, 120, 128, 0.12), rgba(120, 120, 128, 0.24));
+  --surface-hover: light-dark(rgba(120, 120, 128, 0.18), rgba(120, 120, 128, 0.32));
+  --ink: light-dark(#1d1d1f, #f5f5f7);
+  --ink-2: light-dark(rgba(60, 60, 67, 0.78), rgba(235, 235, 245, 0.78));
+  --muted: light-dark(rgba(60, 60, 67, 0.6), rgba(235, 235, 245, 0.6));
+  --faint: light-dark(rgba(60, 60, 67, 0.3), rgba(235, 235, 245, 0.3));
+  --line: light-dark(rgba(60, 60, 67, 0.29), rgba(84, 84, 88, 0.65));
+  --hair: light-dark(rgba(60, 60, 67, 0.22), rgba(84, 84, 88, 0.6));
+  --hair-soft: light-dark(rgba(60, 60, 67, 0.14), rgba(84, 84, 88, 0.45));
+  --accent: light-dark(#007aff, #0a84ff);
+  --accent-ink: light-dark(#0066d6, #409cff);
+  --accent-soft: light-dark(rgba(0, 122, 255, 0.1), rgba(10, 132, 255, 0.16));
+  --on-accent: #ffffff;
+  --ok: light-dark(#34c759, #30d158);
+  --ok-soft: light-dark(rgba(52, 199, 89, 0.12), rgba(48, 209, 88, 0.16));
+  --warn: light-dark(#ff9500, #ff9f0a);
+  --warn-soft: light-dark(rgba(255, 149, 0, 0.12), rgba(255, 159, 10, 0.16));
+  --danger: light-dark(#ff3b30, #ff453a);
+  --danger-soft: light-dark(rgba(255, 59, 48, 0.1), rgba(255, 69, 58, 0.14));
+  --data: var(--accent);
+  --bar: light-dark(rgba(246, 246, 248, 0.78), rgba(30, 30, 32, 0.72));
+  --heat-0: light-dark(rgba(120, 120, 128, 0.14), rgba(120, 120, 128, 0.22));
+  --heat-1: light-dark(#bfd8ff, #1f3f70);
+  --heat-2: light-dark(#7fb4ff, #2a62b3);
+  --heat-3: light-dark(#3d8fff, #0a84ff);
+  --heat-4: light-dark(#0066d6, #6fb1ff);
+
+  --font-display: var(--font-sans);
+  --font-heading: var(--font-sans);
+  --font-number: var(--font-sans);
+  --w-display: 700;
+  --w-heading: 400;
+  --w-number: 600;
+  --ls-display: -0.02em;
+  --ls-heading: 0.02em;
+  --ls-number: -0.02em;
+  --size-heading: 13px;
+  --size-display: clamp(28px, 3vw, 34px);
+  --lh-display: 1.15;
+  --transform-label: none;
+  --ls-label: 0;
+
+  /* The card chrome belongs to the body (below); the section itself is bare. */
+  --card-bg: transparent;
+  --card-border: transparent;
+  --card-border-w: 0px;
+  --card-radius: 12px;
+  --card-shadow: none;
+  --card-pad-x: 16px;
+  --card-pad-y: 0px;
+  --section-rule: transparent;
+  --section-rule-sub: transparent;
+  --col-rule: transparent;
+  --head-rule: transparent;
+  --tile-bg: var(--surface-2);
+  --tile-border: transparent;
+  --tile-radius: 10px;
+  --tile-gap: 8px;
+  --tile-grid-bg: transparent;
+  --input-bg: var(--surface-2);
+  --input-border: transparent;
+  --input-radius: 8px;
+  --btn-bg: var(--accent);
+  --btn-fg: var(--on-accent);
+  --btn-radius: 8px;
+  --chip-radius: 999px;
+}
+
+:root[data-theme="native"] body {
+  font-size: 15px;
+}
+:root[data-theme="native"]:not(#_) .label {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 400;
+}
+
+/* Sections: a plain caption above a white grouped card. */
+:root[data-theme="native"]:not(#_) section.card {
+  overflow: visible;
+}
+:root[data-theme="native"]:not(#_) section.card header {
+  align-items: baseline;
+  padding: 0 16px 7px;
+  margin-bottom: 0;
+  border-bottom: 0;
+}
+:root[data-theme="native"]:not(#_) section.card header .num,
+:root[data-theme="native"]:not(#_) section.card header .glyph {
+  display: none;
+}
+:root[data-theme="native"]:not(#_) section.card h2 {
+  text-transform: none;
+  color: var(--muted);
+  font-weight: 400;
+}
+:root[data-theme="native"]:not(#_) section.card .tools {
+  gap: 6px 14px;
+}
+:root[data-theme="native"]:not(#_) section.card .tool,
+:root[data-theme="native"]:not(#_) section.card .tool:hover {
+  color: var(--accent);
+}
+:root[data-theme="native"]:not(#_) section.card .tool::after {
+  display: none;
+}
+:root[data-theme="native"]:not(#_) section.card .body {
+  padding: 12px 16px 14px;
+  background: var(--surface);
+  border-radius: var(--card-radius);
+}
+:root[data-theme="native"]:not(#_) section.card .figure {
+  color: var(--ink);
+}
+/* Row separators: half a pixel, inset from the left like a grouped table. */
+:root[data-theme="native"]:not(#_) section.card ul:not(.grid):not(.repos) > li {
+  border-top: 1px solid var(--hair-soft);
+}
+:root[data-theme="native"]:not(#_) section.card ul:not(.grid):not(.repos) > li:first-child {
+  border-top: 0;
+}
+
+/* Toolbar: translucent, content scrolls under it. */
+:root[data-theme="native"]:not(#_) .mast {
+  position: sticky;
+  top: 8px;
+  z-index: 5;
+  padding: 8px 10px 8px 18px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--bar);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+  box-shadow: 0 0 0 0.5px var(--hair), 0 8px 24px -16px rgba(0, 0, 0, 0.3);
+}
+@media (prefers-reduced-transparency: reduce) {
+  :root[data-theme="native"]:not(#_) .mast {
+    background: var(--surface);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+:root[data-theme="native"]:not(#_) .brand {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+:root[data-theme="native"]:not(#_) .brand .period {
+  display: none;
+}
+:root[data-theme="native"]:not(#_) .stamp .time {
+  color: var(--muted);
+}
+:root[data-theme="native"]:not(#_) .search {
+  height: 30px;
+  border-radius: 8px;
+  border: 0;
+  background: var(--surface-2);
+}
+:root[data-theme="native"]:not(#_) .search:focus-within {
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+:root[data-theme="native"]:not(#_) .mast .tool {
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 7px;
+  background: var(--surface-2);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 500;
+}
+:root[data-theme="native"]:not(#_) .mast .tool::after {
+  display: none;
+}
+
+/* Hero: a large title; the figures share one card with vertical separators. */
+:root[data-theme="native"]:not(#_) .hero {
+  padding: 16px 0 14px;
+  align-items: end;
+}
+/* Captions need air above them: rows sit further apart than boxed cards do. */
+:root[data-theme="native"]:not(#_) .results {
+  gap: 24px;
+}
+:root[data-theme="native"]:not(#_) .row {
+  gap: 24px;
+}
+:root[data-theme="native"]:not(#_) .hello {
+  padding: 0 16px;
+}
+:root[data-theme="native"]:not(#_) h1 em {
+  color: inherit;
+}
+:root[data-theme="native"]:not(#_) .tagline {
+  margin-top: 4px;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  color: var(--muted);
+}
+:root[data-theme="native"]:not(#_) .index {
+  border: 0;
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: none;
+}
+:root[data-theme="native"]:not(#_) .index li {
+  border-right: 1px solid var(--hair-soft);
+}
+:root[data-theme="native"]:not(#_) .index li:last-child {
+  border-right: 0;
+}
+:root[data-theme="native"]:not(#_) .index a {
+  padding: 14px 16px 12px;
+}
+:root[data-theme="native"]:not(#_) .index a:hover {
+  padding-left: 16px;
+  background: var(--surface-2);
+}
+:root[data-theme="native"]:not(#_) .index .k {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+:root[data-theme="native"]:not(#_) .index .n {
+  font-size: 28px;
+  color: var(--ink);
+}
+:root[data-theme="native"]:not(#_) .index li[data-key="todo"] .n {
+  color: var(--warn);
+}
+
+/* Controls. */
+:root[data-theme="native"]:not(#_) .check {
+  width: 22px;
+  height: 22px;
+  margin-top: 0;
+  border: 1.5px solid var(--faint);
+  border-radius: 50%;
+}
+:root[data-theme="native"]:not(#_) .check.urgent {
+  border-color: var(--danger);
+}
+:root[data-theme="native"]:not(#_) li.checked .check {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+:root[data-theme="native"]:not(#_) .btn {
+  border-color: transparent;
+  background: var(--surface-2);
+  font-weight: 500;
+}
+:root[data-theme="native"]:not(#_) .btn.primary {
+  background: var(--accent);
+}
+:root[data-theme="native"]:not(#_) .tag {
+  height: 20px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--ink-2);
+}
+:root[data-theme="native"]:not(#_) .tag::before {
+  display: none;
+}
+
+/* Services: rows with a blue glyph badge, on a fill. */
+:root[data-theme="native"]:not(#_) .tile {
+  border: 0;
+  gap: 12px;
+  padding: 9px 12px;
+  min-height: 52px;
+}
+:root[data-theme="native"]:not(#_) .tile .glyph {
+  width: 29px;
+  height: 29px;
+  border: 0;
+  border-radius: 7px;
+  background: var(--accent);
+  color: #fff;
+}
+:root[data-theme="native"]:not(#_) .tile .glyph.letter {
+  font-size: 14px;
+}
+:root[data-theme="native"]:not(#_) .tile .name {
+  font-weight: 500;
+}
+:root[data-theme="native"]:not(#_) .dot {
+  box-shadow: none;
+}
+
+/* Sheets. */
+:root[data-theme="native"]:not(#_) dialog {
+  border: 0;
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: 0 0 0 0.5px var(--hair), 0 24px 60px -20px rgba(0, 0, 0, 0.5);
+}

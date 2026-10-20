@@ -20,6 +20,7 @@
 @import "./themes/future.css";
 @import "./themes/tech.css";
 @import "./themes/industrial.css";
+@import "./themes/native.css";
 
 /* =====================================================================
    Three looks on one structure. Components only use the semantic tokens
