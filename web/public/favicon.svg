@@ -1,1 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#1c1c1a"/><path d="M18 34 32 21l14 13v11a2 2 0 0 1-2 2h-7v-9h-10v9h-7a2 2 0 0 1-2-2z" fill="#f5f4f0"/><circle cx="46" cy="18" r="5" fill="#3f9b7f"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- The masthead's "Home." as a mark: a house in ink on paper, with the red period. -->
+  <style>
+    .bg { fill: #f3f1ea; }
+    .ink { fill: #16150f; }
+    .roof { stroke: #16150f; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #16150f; }
+      .ink { fill: #ece9df; }
+      .roof { stroke: #ece9df; }
+    }
+  </style>
+  <rect class="bg" width="64" height="64" rx="14"/>
+  <path class="roof" d="M11 33 32 14l21 19" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path class="ink" d="M19 31h26v18a2 2 0 0 1-2 2H21a2 2 0 0 1-2-2z"/>
+  <circle cx="52.5" cy="48" r="5.5" fill="#c8411e"/>
+</svg>
